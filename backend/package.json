@@ -1,0 +1,24 @@
+{
+  "name": "essential-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test --test-concurrency=1 src",
+    "migrate": "node-pg-migrate --migrations-dir src/db/migrations --migrations-table pgmigrations"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "node-pg-migrate": "^7.6.1",
+    "pg": "^8.12.0",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

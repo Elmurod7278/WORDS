@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Vocabulary Quiz</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.3);
+            --danger: #f43f5e;
+            --danger-glow: rgba(244, 63, 94, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --btn-option-bg: rgba(51, 65, 85, 0.6);
+            --btn-option-border: rgba(255, 255, 255, 0.05);
+            --btn-option-hover: rgba(71, 85, 105, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Abstract glowing blobs for premium design background */
+        .blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .blob-1 {
+            top: 10%;
+            left: 15%;
+            background-color: var(--primary);
+        }
+        .blob-2 {
+            bottom: 10%;
+            right: 15%;
+            background-color: #ec4899;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 
+                        0 0 50px rgba(99, 102, 241, 0.05);
+            width: 100%;
+            max-width: 580px;
+            text-align: center;
+            z-index: 1;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        h1, h2 {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .mode-select, .quiz-box, .result-box {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            margin: 10px 0;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+            filter: brightness(1.1);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        /* Option Buttons Grid */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .option-btn {
+            background-color: var(--btn-option-bg);
+            border: 1px solid var(--btn-option-border);
+            color: var(--text-main);
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            border-radius: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--btn-option-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* Correct / Incorrect states */
+        .option-btn.btn-correct {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.35) 100%) !important;
+            border-color: var(--success) !important;
+            color: #a7f3d0 !important;
+            font-weight: 700;
+            box-shadow: 0 0 15px var(--success-glow);
+        }
+
+        .option-btn.btn-incorrect {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(244, 63, 94, 0.35) 100%) !important;
+            border-color: var(--danger) !important;
+            color: #fecdd3 !important;
+            font-weight: 700;
+            box-shadow: 0 0 15px var(--danger-glow);
+        }
+
+        /* Badges for Options Feedback */
+        .badge-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .btn-correct .badge-icon::after {
+            content: "✓";
+            color: #10b981;
+        }
+        .btn-incorrect .badge-icon::after {
+            content: "✗";
+            color: #f43f5e;
+        }
+
+        /* Top Progress & Stats */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a5b4fc);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Question Box */
+        .question-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            padding: 30px 20px;
+            margin-bottom: 10px;
+        }
+
+        .question-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .question {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+
+        /* Next Button Container */
+        .next-container {
+            margin-top: 25px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-next {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 12px 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: auto;
+            min-width: 160px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+        }
+
+        .btn-next.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .btn-next:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Score Stats */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 15px 10px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Circular Progress Indicator for Results */
+        .score-circle-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 20px auto;
+        }
+
+        .score-circle-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .score-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.04);
+            stroke-width: 8;
+        }
+
+        .score-circle-bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 377; /* 2 * PI * R where R = 60 */
+            stroke-dashoffset: 377;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-percent {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .score-fraction {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -2px;
+        }
+
+        /* Mistakes Report Section */
+        .mistakes-section {
+            text-align: left;
+            margin: 30px 0;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .mistakes-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mistakes-title span.count-badge {
+            background-color: var(--danger);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 800;
+        }
+
+        .mistakes-list {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Scrollbar styling */
+        .mistakes-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .mistakes-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .mistakes-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .mistakes-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .mistake-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .mistake-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .mistake-word {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .mistake-mode-badge {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .mistake-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .mistake-user {
+            color: #fda4af; /* light rose */
+            text-decoration: line-through;
+            opacity: 0.95;
+        }
+
+        .mistake-correct {
+            color: #6ee7b7; /* light emerald */
+            font-weight: 600;
+        }
+
+        .congratulations-msg {
+            text-align: center;
+            padding: 20px 0;
+            color: #6ee7b7;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="quiz-container">
+    <!-- 1. MODE SELECTION -->
+    <div id="mode-section" class="mode-select active">
+        <h1>Lug'at Testi</h1>
+        <p class="subtitle">Lug'at boyligingizni oshirish uchun test topshiring</p>
+        
+        <button class="btn-action" onclick="startQuiz('en-uz')">
+            <span>English</span> ➔ <span>O'zbekcha</span>
+        </button>
+        <button class="btn-action" onclick="startQuiz('uz-en')">
+            <span>O'zbekcha</span> ➔ <span>English</span>
+        </button>
+        <button class="btn-action" onclick="startQuiz('mixed')" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
+            <span>Aralash (Mixed)</span> 🌀
+        </button>
+    </div>
+
+    <!-- 2. QUIZ INTERFACE -->
+    <div id="quiz-section" class="quiz-box">
+        <div class="quiz-header">
+            <div id="progress-text">Savol: 1/50</div>
+            <div id="score-counter">To'g'ri: 0 | Xato: 0</div>
+        </div>
+        
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-label" id="question-label">Tarjimasini toping</div>
+            <div class="question" id="question-text">Sifat</div>
+        </div>
+
+        <div class="options-container" id="options-box">
+            <!-- Dynamically populated option buttons -->
+        </div>
+
+        <div class="next-container">
+            <button class="btn-next" id="next-btn" onclick="nextQuestion()">
+                <span>Keyingisi</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. RESULTS AND MISTAKES REPORT -->
+    <div id="result-section" class="result-box">
+        <h2>Test Yakunlandi!</h2>
+        <p class="subtitle" style="margin-bottom: 20px;">Natijalaringiz tahlili</p>
+
+        <!-- Circular Score Indicator -->
+        <div class="score-circle-wrapper">
+            <svg class="score-circle-svg">
+                <circle class="score-circle-bg" cx="70" cy="70" r="60"></circle>
+                <circle class="score-circle-bar" id="score-stroke-bar" cx="70" cy="70" r="60"></circle>
+            </svg>
+            <div class="score-circle-text">
+                <div class="score-percent" id="final-accuracy">0%</div>
+                <div class="score-fraction" id="final-score-fraction">0 / 0</div>
+            </div>
+        </div>
+
+        <!-- Detailed statistics -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Jami</div>
+            </div>
+            <div class="stat-card" style="color: #6ee7b7;">
+                <div class="stat-value" id="stat-correct">0</div>
+                <div class="stat-label">To'g'ri</div>
+            </div>
+            <div class="stat-card" style="color: #fda4af;">
+                <div class="stat-value" id="stat-incorrect">0</div>
+                <div class="stat-label">Xato</div>
+            </div>
+        </div>
+
+        <!-- Mistakes Report -->
+        <div class="mistakes-section" id="mistakes-section-block">
+            <div class="mistakes-title">
+                Yo'l qo'yilgan xatolar
+                <span class="count-badge" id="mistakes-count">0</span>
+            </div>
+            <div class="mistakes-list" id="mistakes-list-container">
+                <!-- Dynamically populated list of errors -->
+            </div>
+        </div>
+
+        <button class="btn-action" onclick="restartQuiz()" style="margin-top: 10px;">
+            Qayta boshlash ↻
+        </button>
+    </div>
+</div>
+
+<script>
+// Ikkita massiv: English va O'zbekcha (Tartib raqamiga ko'ra mos keladi)
+const englishWords = [
+    "Active", "Ambitious", "Anxious", "Brave", "Calm", "Careful", "Cheerful", "Clever", "Confident", "Creative",
+    "Curious", "Dependable", "Friendly", "Funny", "Generous", "Grateful", "Hardworking", "Honest", "Hopeful", "Humble",
+    "Imaginative", "Independent", "Kind", "Lazy", "Loyal", "Moody", "Neat", "Optimistic", "Organized", "Patient",
+    "Polite", "Quiet", "Reliable", "Responsible", "Selfish", "Sensitive", "Shy", "Silly", "Smart", "Social",
+    "Stubborn", "Talkative", "Thankful", "Thoughtful", "Timid", "Trustworthy", "Understanding", "Wise", "Charming", "Adaptable"
+];
+
+const uzbekWords = [
+    "Faol, chaqqon", "Shijoatli, intiluvchan", "Xavotirli, bezovta", "Jasur, qoʻrqmas", "Xotirjam, ogʻir-bosiq", "Ehtiyotkor, diqqatli", "Quvnoq, xushchaqchaq", "Aqlli, ziyorek", "Oʻziga ishongan", "Ijodkor, yaratuvchan",
+    "Qiziquvchan", "Ishonchli, suyanarli", "Doʻstona, samimiy", "Kulgili, qiziqchi", "Saxiy, qoʻli ochiq", "Minnatdor, shukur qiluvchi", "Mehnatsevar", "Halol, rostgoʻy", "Umidvor, kelajakka ishonuvchan", "Kamtar, kamtarin",
+    "Tasavvuri boy, xayolparast", "Mustaqil", "Mehribon, shafqatli", "Dangasa", "Sodiq, vafodor", "Sersajra, kayfiyati tez oʻzgaruvchan", "Ozoda, saranjom", "Nekbin, ijobiy fikrlovchi", "Tartibli, uyushqoq", "Sabrli, chidamli",
+    "Xushmuomala, odobli", "Kamgap, tinch", "Ishonchli", "Masʼuliyatli", "Xudbin", "Taʼsirchan, nozik", "Uyalchang, tortinchoq", "Quvnoq ahmoqona, boʻlar-boʻlmas", "Aqlli, zukko", "Kirishimli, xushmuloqot",
+    "Qaysar, oʻjar", "Sergap, vadragi", "Minnatdor", "Eʼtiborli, gʻamxoʻr", "Qoʻrqoq, tortinchoq", "Ishonishga loyiq, sirdosh", "Tushunadigan, hamdard", "Dono, oqil", "Maftunkor, jozibali", "Moslashuvchan"
+];
+
+// Massivlarni avtomatik ravishda obyektlar ro'yxatiga aylantirish
+let vocabulary = [];
+function buildVocabulary() {
+    vocabulary = [];
+    const minLength = Math.min(englishWords.length, uzbekWords.length);
+    for (let i = 0; i < minLength; i++) {
+        vocabulary.push({
+            en: englishWords[i].trim(),
+            uz: uzbekWords[i].trim(),
+            index: i
+        });
+    }
+}
+
+// Boshlang'ich shakllantirish
+buildVocabulary();
+
+let quizQuestions = [];
+let currentQuestionIndex = 0;
+let scoreCorrect = 0;
+let scoreIncorrect = 0;
+let quizMode = 'en-uz'; // 'en-uz', 'uz-en', yoki 'mixed'
+let mistakesList = [];
+let autoAdvanceTimeout = null;
+let currentQuestionMode = 'en-uz'; // Har bir savol uchun rejim (mixed uchun asqotadi)
+
+// Fisher-Yates aralashtirish algoritmi
+function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+function startQuiz(mode) {
+    quizMode = mode;
+    currentQuestionIndex = 0;
+    scoreCorrect = 0;
+    scoreIncorrect = 0;
+    mistakesList = [];
+    
+    // Savollarni nusxalab aralashtiramiz
+    quizQuestions = shuffle([...vocabulary]);
+    
+    // Bo'limlarni ko'rsatish
+    switchSection('mode-section', 'quiz-section');
+    showQuestion();
+}
+
+function switchSection(fromId, toId) {
+    const fromEl = document.getElementById(fromId);
+    const toEl = document.getElementById(toId);
+    
+    fromEl.style.opacity = 0;
+    fromEl.style.transform = 'translateY(-10px)';
+    
+    setTimeout(() => {
+        fromEl.classList.remove('active');
+        toEl.classList.add('active');
+        // Trigger reflow
+        toEl.offsetHeight;
+        toEl.style.opacity = 1;
+        toEl.style.transform = 'translateY(0)';
+    }, 200);
+}
+
+function showQuestion() {
+    // Har qanday eski taymerlarni tozalash
+    if (autoAdvanceTimeout) {
+        clearTimeout(autoAdvanceTimeout);
+    }
+
+    if (currentQuestionIndex >= quizQuestions.length) {
+        endQuiz();
+        return;
+    }
+
+    const currentQuestion = quizQuestions[currentQuestionIndex];
+    
+    // Progress va counterlar
+    document.getElementById('progress-text').innerText = `Savol: ${currentQuestionIndex + 1}/${quizQuestions.length}`;
+    document.getElementById('score-counter').innerText = `To'g'ri: ${scoreCorrect} | Xato: ${scoreIncorrect}`;
+    
+    // Progress bar yangilash
+    const progressPercent = ((currentQuestionIndex) / quizQuestions.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+    // Rejimni aniqlash (Aralash rejim bo'lsa har bir savolni tasodifiy tanlaymiz)
+    if (quizMode === 'mixed') {
+        currentQuestionMode = Math.random() < 0.5 ? 'en-uz' : 'uz-en';
+    } else {
+        currentQuestionMode = quizMode;
+    }
+
+    // Savol yorlig'i va so'zi
+    const labelEl = document.getElementById('question-label');
+    const textEl = document.getElementById('question-text');
+    
+    if (currentQuestionMode === 'en-uz') {
+        labelEl.innerText = "Inglizcha so'zning tarjimasini toping";
+        textEl.innerText = currentQuestion.en;
+    } else {
+        labelEl.innerText = "O'zbekcha so'zning tarjimasini toping";
+        textEl.innerText = currentQuestion.uz;
+    }
+
+    // Savol kartasiga kichik pop animatsiya berish
+    const questionCard = document.querySelector('.question-card');
+    questionCard.classList.remove('animate-pop');
+    void questionCard.offsetWidth; // reflow
+    questionCard.classList.add('animate-pop');
+
+    // To'g'ri javob kalitini va javob variantlarini aniqlash
+    const correctField = currentQuestionMode === 'en-uz' ? 'uz' : 'en';
+    const correctAnswerText = currentQuestion[correctField];
+
+    // Noto'g'ri javoblarni tayyorlash (distractors)
+    let distractors = vocabulary
+        .filter(item => item[correctField] !== correctAnswerText)
+        .map(item => item[correctField]);
+    
+    // Unikal noto'g'ri javoblar ro'yxati
+    distractors = [...new Set(distractors)];
+    shuffle(distractors);
+
+    // 1 ta to'g'ri va 3 ta noto'g'ri variant
+    let options = [correctAnswerText];
+    for (let i = 0; i < 3; i++) {
+        if (distractors[i]) {
+            options.push(distractors[i]);
+        }
+    }
+
+    // Variantlarni aralashtirish
+    shuffle(options);
+
+    // Variant tugmalarini chiqarish
+    const optionsBox = document.getElementById('options-box');
+    optionsBox.innerHTML = '';
+
+    options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerHTML = `<span>${option}</span><span class="badge-icon"></span>`;
+        btn.onclick = () => selectOption(btn, option, correctAnswerText);
+        optionsBox.appendChild(btn);
+    });
+
+    // "Keyingisi" tugmasini yashirish
+    document.getElementById('next-btn').classList.remove('visible');
+}
+
+function selectOption(clickedBtn, selectedOption, correctAnswerText) {
+    const allButtons = document.querySelectorAll('.option-btn');
+    
+    // Barcha tugmalarni muzlatish
+    allButtons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    const isCorrect = (selectedOption === correctAnswerText);
+    const currentQuestion = quizQuestions[currentQuestionIndex];
+
+    if (isCorrect) {
+        clickedBtn.classList.add('btn-correct');
+        scoreCorrect++;
+    } else {
+        clickedBtn.classList.add('btn-incorrect');
+        scoreIncorrect++;
+        
+        // To'g'ri javobni yashil qilib ko'rsatish
+        allButtons.forEach(btn => {
+            if (btn.querySelector('span').innerText === correctAnswerText) {
+                btn.classList.add('btn-correct');
+            }
+        });
+
+        // Xatoliklar ro'yxatiga qo'shish
+        const sourceWord = currentQuestionMode === 'en-uz' ? currentQuestion.en : currentQuestion.uz;
+        mistakesList.push({
+            word: sourceWord,
+            userAnswer: selectedOption,
+            correctAnswer: correctAnswerText,
+            mode: currentQuestionMode === 'en-uz' ? 'EN ➔ UZ' : 'UZ ➔ EN'
+        });
+    }
+
+    // Counterlarni yangilash
+    document.getElementById('score-counter').innerText = `To'g'ri: ${scoreCorrect} | Xato: ${scoreIncorrect}`;
+
+    // Keyingi tugmasini ko'rsatish
+    document.getElementById('next-btn').classList.add('visible');
+
+    // 2.2 soniyadan keyin avtomatik o'tish (foydalanuvchi "Keyingi" tugmasini bosmasa)
+    autoAdvanceTimeout = setTimeout(() => {
+        nextQuestion();
+    }, 2200);
+}
+
+function nextQuestion() {
+    if (autoAdvanceTimeout) {
+        clearTimeout(autoAdvanceTimeout);
+    }
+    currentQuestionIndex++;
+    showQuestion();
+}
+
+function endQuiz() {
+    // Progress bar oxirigacha to'lishi
+    document.getElementById('progress-bar').style.width = '100%';
+
+    // Bo'limni almashtirish
+    switchSection('quiz-section', 'result-section');
+
+    const totalQuestions = quizQuestions.length;
+    const accuracy = totalQuestions > 0 ? Math.round((scoreCorrect / totalQuestions) * 100) : 0;
+
+    // Stat kartalarni yangilash
+    document.getElementById('stat-total').innerText = totalQuestions;
+    document.getElementById('stat-correct').innerText = scoreCorrect;
+    document.getElementById('stat-incorrect').innerText = scoreIncorrect;
+
+    // Doiraviy progressni yangilash
+    document.getElementById('final-accuracy').innerText = `${accuracy}%`;
+    document.getElementById('final-score-fraction').innerText = `${scoreCorrect} / ${totalQuestions}`;
+
+    // SVG animatsiyasi (dashoffset hisoblash)
+    const circleBar = document.getElementById('score-stroke-bar');
+    const radius = circleBar.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius; // taxminan 377
+    const offset = circumference - (accuracy / 100) * circumference;
+    
+    // Animatsiya ishlashi uchun ozgina kechikish beramiz
+    setTimeout(() => {
+        circleBar.style.strokeDashoffset = offset;
+    }, 150);
+
+    // Xatoliklar hisoboti
+    const mistakesBlock = document.getElementById('mistakes-section-block');
+    const mistakesContainer = document.getElementById('mistakes-list-container');
+    const countBadge = document.getElementById('mistakes-count');
+    
+    mistakesContainer.innerHTML = '';
+
+    if (mistakesList.length > 0) {
+        mistakesBlock.style.display = 'block';
+        countBadge.innerText = mistakesList.length;
+
+        mistakesList.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'mistake-item';
+            row.innerHTML = `
+                <div class="mistake-word">
+                    <span>${item.word}</span>
+                    <span class="mistake-mode-badge">${item.mode}</span>
+                </div>
+                <div class="mistake-details">
+                    <span class="mistake-user">Siz: ${item.userAnswer}</span>
+                    <span class="mistake-correct">To'g'ri: ${item.correctAnswer}</span>
+                </div>
+            `;
+            mistakesContainer.appendChild(row);
+        });
+    } else {
+        // Xatolar umuman bo'lmasa mukammal natija xabari
+        mistakesBlock.style.display = 'block';
+        countBadge.innerText = '0';
+        countBadge.style.backgroundColor = 'var(--success)';
+        mistakesContainer.innerHTML = `
+            <div class="congratulations-msg">
+                Ajoyib! Barcha savollarga to'g'ri javob berdingiz! 🏆🎉
+            </div>
+        `;
+    }
+}
+
+function restartQuiz() {
+    // Progress bar nollash
+    document.getElementById('progress-bar').style.width = '0%';
+    // Doiraviy stroke bar offsetini nollash
+    document.getElementById('score-stroke-bar').style.strokeDashoffset = 377;
+    
+    switchSection('result-section', 'mode-section');
+}
+</script>
+
+</body>
+</html>
