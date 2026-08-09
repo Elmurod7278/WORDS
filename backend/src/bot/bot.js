@@ -1,16 +1,25 @@
 const { Telegraf, Markup } = require('telegraf');
 const { getUserByTelegramId, upsertUser, updateUserPhone } = require('../services/user.service.js');
 
+const DEFAULT_WELCOME_PHOTO = "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1000&auto=format&fit=crop";
+
 const WELCOME_CAPTION =
-  "🎓 *4000 Essential English Words* — ingliz tili lug'atini oson va qiziqarli o'rganish uchun yaratilgan interaktiv ilova!\n\n" +
-  "📚 5 ta kitob, 150 dan ortiq unit, minglab so'z\n" +
-  "🎮 12 xil mashq turi: kartochkalar, testlar, o'yinlar va boshqalar\n" +
-  "🔥 Kunlik seriya va shaxsiy statistikangizni kuzating\n\n" +
-  "Xizmatlardan to'liq foydalanish uchun pastdagi tugma orqali telefon raqamingizni tasdiqlang 👇";
+  "✨ <b>WORDS — Zamonaviy Ko'p Tilli Lug'at & Amaliyot Ilovasi</b> 🌐\n\n" +
+  "<b>WORDS</b> — chet tillarini (Ingliz, Arab, Rus, Nemis, Fransuz, Turk va b.) oson va samarali o'rganish uchun yaratilgan interaktiv Telegram Mini App ilovasi! 🚀\n\n" +
+  "<b>💡 Asosiy Imkoniyatlar:</b>\n" +
+  "📖 <b>Shaxsiy Lug'at</b> — O'zingiz xohlagan so'zlar va to'plamlarni kiritib boring\n" +
+  "📁 <b>To'plamlar (Units)</b> — So'zlaringizni guruhlab, to'plam tarzida tahrirlang\n" +
+  "🔊 <b>Jonli Ovozli Talaffuz</b> — Arab, Ingliz, Rus va barcha tillarda tiniq talaffuz (TTS Engine)\n" +
+  "🎮 <b>12 xil Interaktiv Mashqlar</b> — Flashcards, Quiz, Yozish va Eshitish o'yinlari\n" +
+  "🔥 <b>Statistika & Seriya</b> — O'rganish ko'rsatkichlaringiz va kunlik faolligingizni kuzatib boring\n" +
+  "🔒 <b>Xavfsiz Xotira</b> — Ma'lumotlaringiz shaxsiy va mutlaqo himoyalangan\n\n" +
+  "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>";
 
 function buildMiniAppKeyboard(env) {
+  const url = (env && env.miniAppUrl && env.miniAppUrl.startsWith('http')) ? env.miniAppUrl : "https://words.reach.uz/";
   return Markup.inlineKeyboard([
-    Markup.button.webApp('📖 Ilovani ochish', env.miniAppUrl),
+    [Markup.button.webApp("🚀 Lug'atni ochish (Mini App)", url)],
+    [Markup.button.webApp("📚 Shaxsiy Lug'atim", url)]
   ]);
 }
 
@@ -23,23 +32,33 @@ function buildContactKeyboard() {
 }
 
 async function sendWelcomeBack(ctx, env) {
-  await ctx.reply(
-    `Xush kelibsiz, ${ctx.from.first_name}! Tizimga qaytganingizdan xursandmiz 🎉`,
-    buildMiniAppKeyboard(env)
-  );
+  const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
+  try {
+    await ctx.replyWithPhoto(photoUrl, {
+      caption: `Xush kelibsiz, <b>${ctx.from.first_name || 'Foydalanuvchi'}</b>! 👋\n\n` + WELCOME_CAPTION,
+      parse_mode: 'HTML',
+      ...buildMiniAppKeyboard(env)
+    });
+  } catch (e) {
+    await ctx.reply(WELCOME_CAPTION, {
+      parse_mode: 'HTML',
+      ...buildMiniAppKeyboard(env)
+    });
+  }
 }
 
 async function sendOnboarding(ctx, env) {
-  if (env.welcomePhotoUrl) {
-    await ctx.replyWithPhoto(env.welcomePhotoUrl, {
+  const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
+  try {
+    await ctx.replyWithPhoto(photoUrl, {
       caption: WELCOME_CAPTION,
-      parse_mode: 'Markdown',
-      ...buildContactKeyboard(),
+      parse_mode: 'HTML',
+      ...buildMiniAppKeyboard(env)
     });
-  } else {
+  } catch (e) {
     await ctx.reply(WELCOME_CAPTION, {
-      parse_mode: 'Markdown',
-      ...buildContactKeyboard(),
+      parse_mode: 'HTML',
+      ...buildMiniAppKeyboard(env)
     });
   }
 }
