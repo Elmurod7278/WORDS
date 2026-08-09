@@ -1,7 +1,24 @@
 const { Telegraf, Markup } = require('telegraf');
 const { getUserByTelegramId, upsertUser, updateUserPhone } = require('../services/user.service.js');
+const path = require('path');
+const fs = require('fs');
 
-const DEFAULT_WELCOME_PHOTO = "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1000&auto=format&fit=crop";
+const LOCAL_WELCOME_PHOTO = path.join(__dirname, '../../../start_welcome.jpg');
+const DEFAULT_WELCOME_PHOTO = "https://words.reach.uz/start_welcome.jpg";
+
+function getWelcomePhoto(env) {
+  if (env && env.welcomePhotoUrl && env.welcomePhotoUrl.startsWith('http')) {
+    return env.welcomePhotoUrl;
+  }
+  if (fs.existsSync(LOCAL_WELCOME_PHOTO)) {
+    return { source: LOCAL_WELCOME_PHOTO };
+  }
+  const altPath = path.join(__dirname, '../../assets/start_welcome.jpg');
+  if (fs.existsSync(altPath)) {
+    return { source: altPath };
+  }
+  return DEFAULT_WELCOME_PHOTO;
+}
 
 const WELCOME_CAPTION =
   "✨ <b>WORDS — Zamonaviy Ko'p Tilli Lug'at & Amaliyot Ilovasi</b> 🌐\n\n" +
@@ -31,14 +48,15 @@ function buildContactKeyboard() {
 }
 
 async function sendWelcomeBack(ctx, env) {
-  const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
+  const photo = getWelcomePhoto(env);
   try {
-    await ctx.replyWithPhoto(photoUrl, {
+    await ctx.replyWithPhoto(photo, {
       caption: `Xush kelibsiz, <b>${ctx.from.first_name || 'Foydalanuvchi'}</b>! 👋\n\n` + WELCOME_CAPTION + "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>",
       parse_mode: 'HTML',
       ...buildMiniAppKeyboard(env)
     });
   } catch (e) {
+    console.error("Error sending welcome photo:", e);
     await ctx.reply(WELCOME_CAPTION + "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>", {
       parse_mode: 'HTML',
       ...buildMiniAppKeyboard(env)
@@ -47,17 +65,18 @@ async function sendWelcomeBack(ctx, env) {
 }
 
 async function sendPhonePrompt(ctx, env) {
-  const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
+  const photo = getWelcomePhoto(env);
   const promptText = WELCOME_CAPTION +
     "⚠️ <b>Ilovadan foydalanish uchun telefon raqamingizni tasdiqlashingiz shart!</b>\n\n" +
     "Iltimos, pastdagi <b>'Telefon raqamini yuborish 📱'</b> tugmasini bosing (o'zingiz qo'lda kiritmang). 👇";
   try {
-    await ctx.replyWithPhoto(photoUrl, {
+    await ctx.replyWithPhoto(photo, {
       caption: promptText,
       parse_mode: 'HTML',
       ...buildContactKeyboard()
     });
   } catch (e) {
+    console.error("Error sending phone prompt photo:", e);
     await ctx.reply(promptText, {
       parse_mode: 'HTML',
       ...buildContactKeyboard()
