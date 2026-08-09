@@ -150,96 +150,125 @@ function shuffleArray(array) {
   return result;
 }
 
-// English Text-to-Speech (TTS) - Hybrid System (Web Speech + Network Fallback)
-function speakWord(text, onEndCallback = null) {
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.TelegramWebviewProxy;
+// ---- Multi-Language Text-to-Speech (TTS) Engine ----
+function detectTextLang(text, wordItem = null) {
+  if (wordItem && wordItem._srcLang) return wordItem._srcLang;
+  if (!text) return "en";
 
-  if (isMobile) {
-    // 1. Mobile WebView (iOS / Android / Telegram App) -> Play via highly compatible DOM-based Youdao TTS API
-    playMobileTTS(text, onEndCallback);
-  } else {
-    // 2. Desktop -> Play offline using native SpeechSynthesis
-    playNativeTTS(text, onEndCallback);
+  // Check Arabic script (e.g. وَقْت, سَفَر, خَبَر, دُنْيَا)
+  if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text)) return "ar";
+  // Check Cyrillic / Russian script
+  if (/[\u0400-\u04FF]/.test(text)) return "ru";
+  // Check Korean
+  if (/[\uAC00-\uD7AF\u1100-\u11FF]/.test(text)) return "ko";
+  // Check Japanese (Hiragana/Katakana/Kanji)
+  if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FBF]/.test(text)) return "ja";
+  // Check Chinese
+  if (/[\u4E00-\u9FFF]/.test(text)) return "zh";
+
+  // Infer from active book key (e.g. "🇸🇦 Arab - 🇺🇿 O'zbek")
+  if (state && state.activeBookKey) {
+    const srcStr = state.activeBookKey.split(" - ")[0] || "";
+    const entry = Object.entries(LANG_META).find(([code, meta]) =>
+      srcStr.includes(meta.name) || srcStr.includes(meta.flag)
+    );
+    if (entry) return entry[0];
   }
+  return "en";
 }
 
-function playMobileTTS(text, onEndCallback) {
-  try {
-    const audioEl = document.getElementById("global-tts-player");
-    if (!audioEl) {
-      // Fallback if the element is not found
-      playNativeTTS(text, onEndCallback);
-      return;
-    }
-    
-    // Stop any currently playing audio
-    audioEl.pause();
-    
-    const cleanText = text.trim();
-    // Youdao TTS provides a highly stable, CORS-free, referrer-unblocked American English voice
-    const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(cleanText)}`;
-    
-    audioEl.src = url;
-    // Force the element to drop any previously buffered/queued audio before
-    // playing the new source — without this, some embedded WebViews (e.g.
-    // Telegram Desktop's Mini App webview) keep the old decoded buffer
-    // queued alongside the new one and the word audibly plays twice.
-    audioEl.load();
-
-    // Clear previous event listeners to avoid memory leaks or duplicate triggers
-    audioEl.onended = null;
-    audioEl.onerror = null;
-    
-    if (onEndCallback) {
-      audioEl.onended = onEndCallback;
-      audioEl.onerror = onEndCallback;
-    }
-    
-    const playPromise = audioEl.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(err => {
-        console.warn("Mobile TTS play blocked, trying native fallback:", err);
-        playNativeTTS(text, onEndCallback);
-      });
-    }
-  } catch (e) {
-    console.warn("Mobile TTS error, falling back to native:", e);
-    playNativeTTS(text, onEndCallback);
-  }
+function speakWord(text, onEndCallback = null, explicitLang = null) {
+  const lang = explicitLang || detectTextLang(text);
+  speakWordInLang(text, lang, onEndCallback);
 }
 
-function playNativeTTS(text, onEndCallback) {
-  if (!state.speechSynth) {
-    if (onEndCallback) onEndCallback();
+function speakWordInLang(text, langCode = "en", onEndCallback = null) {
+  if (!text || !text.toString().trim()) {
+    if (typeof onEndCallback === "function") onEndCallback();
     return;
   }
-  try {
-    if (state.speechSynth.paused) {
-      state.speechSynth.resume();
+  const cleanText = text.toString().trim();
+  const lang = (langCode || detectTextLang(cleanText) || "en").toLowerCase();
+
+  let handled = false;
+  const done = () => {
+    if (handled) return;
+    handled = true;
+    if (typeof onEndCallback === "function") onEndCallback();
+  };
+
+  // Primary: DOM audio player using Google Translate / Youdao TTS
+  const audioEl = document.getElementById("global-tts-player");
+  if (audioEl) {
+    try {
+      audioEl.pause();
+
+      const url = (lang === "en")
+        ? `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(cleanText)}`
+        : `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=${encodeURIComponent(lang)}&client=tw-ob`;
+
+      audioEl.src = url;
+      audioEl.load();
+
+      audioEl.onended = done;
+      audioEl.onerror = () => playNativeTTSInLang(cleanText, lang, done);
+
+      const playPromise = audioEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.warn("TTS audio element play catch, falling back to Web Speech:", err);
+          playNativeTTSInLang(cleanText, lang, done);
+        });
+      }
+      return;
+    } catch (e) {
+      console.warn("TTS audio element exception, falling back to Web Speech:", e);
     }
-    state.speechSynth.cancel(); // Interrupt any ongoing speech
+  }
+
+  // Fallback: Web Speech API
+  playNativeTTSInLang(cleanText, lang, done);
+}
+
+function playNativeTTSInLang(text, langCode, onEndCallback) {
+  const synth = window.speechSynthesis || (state && state.speechSynth);
+  if (!synth) {
+    if (typeof onEndCallback === "function") onEndCallback();
+    return;
+  }
+
+  let handled = false;
+  const done = () => {
+    if (handled) return;
+    handled = true;
+    if (typeof onEndCallback === "function") onEndCallback();
+  };
+
+  try {
+    if (synth.paused) synth.resume();
+    synth.cancel();
   } catch (e) {}
 
+  const meta = LANG_META[langCode] || { bcp: "en-US" };
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
+  utterance.lang = meta.bcp || langCode;
+  utterance.rate = (state && state.speechRate) || 0.88;
+  utterance.pitch = (state && state.speechPitch) || 1.0;
 
-  // Apply rate and pitch
-  utterance.rate = state.speechRate || 1.0;
-  utterance.pitch = state.speechPitch || 1.0;
-
-  // Use the system default English speaker.
-  const englishVoice = state.voices.find(v => v.lang && v.lang.startsWith("en-") && !v.localService) ||
-                       state.voices.find(v => v.lang && v.lang.startsWith("en-"));
-  if (englishVoice) {
-    utterance.voice = englishVoice;
+  const voices = (synth.getVoices ? synth.getVoices() : null) || (state && state.voices) || [];
+  if (voices && voices.length > 0) {
+    const matchVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(langCode.toLowerCase()));
+    if (matchVoice) utterance.voice = matchVoice;
   }
 
-  if (onEndCallback) {
-    utterance.onend = onEndCallback;
-    utterance.onerror = onEndCallback; // Fallback so callback fires on error
-  }
+  utterance.onend = done;
+  utterance.onerror = done;
 
-  state.speechSynth.speak(utterance);
+  try {
+    synth.speak(utterance);
+  } catch (e) {
+    done();
+  }
 }
 
 // 4. UI Transition & Navigation Tab Manager
