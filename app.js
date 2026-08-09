@@ -5587,6 +5587,12 @@ function openCustomWordModal(editId) {
     if (addRowBtn) addRowBtn.style.display = "flex";
   }
 
+  // Ensure Bittalab kiritish tab is active by default
+  const tabSingle = document.getElementById("cw-mode-tab-single");
+  const tabBulk = document.getElementById("cw-mode-tab-bulk");
+  if (tabSingle) tabSingle.classList.add("active");
+  if (tabBulk) tabBulk.classList.remove("active");
+
   updateModalLangLabels();
   if (overlay) overlay.style.display = "flex";
 
@@ -6131,19 +6137,26 @@ function initCustomWords() {
     });
   }
 
-  // ---- Word Modal: Dynamic Add Row & Switch to Bulk Buttons ----
+  // ---- Word Modal: Mode Switcher Tabs (Bittalab vs Ko'plab) & Add Row ----
+  const tabSingle = document.getElementById("cw-mode-tab-single");
+  const tabBulk = document.getElementById("cw-mode-tab-bulk");
+  if (tabSingle) {
+    tabSingle.addEventListener("click", () => {
+      if (tabSingle) tabSingle.classList.add("active");
+      if (tabBulk) tabBulk.classList.remove("active");
+    });
+  }
+  if (tabBulk) {
+    tabBulk.addEventListener("click", () => {
+      closeCustomWordModal();
+      openBulkModal();
+    });
+  }
+
   const addRowBtn = document.getElementById("cw-add-row-btn");
   if (addRowBtn) {
     addRowBtn.addEventListener("click", () => {
       addWordRowToModal("", "", "", "", "");
-    });
-  }
-
-  const switchBulkBtn = document.getElementById("cw-switch-bulk-btn");
-  if (switchBulkBtn) {
-    switchBulkBtn.addEventListener("click", () => {
-      closeCustomWordModal();
-      openBulkModal();
     });
   }
 
