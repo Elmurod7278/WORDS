@@ -6,7 +6,7 @@ function createTestPool() {
 }
 
 async function resetDb(pool) {
-  await pool.query('TRUNCATE TABLE events, sessions, users RESTART IDENTITY CASCADE');
+  await pool.query('TRUNCATE TABLE user_words, events, sessions, users RESTART IDENTITY CASCADE');
 }
 
 module.exports = { createTestPool, resetDb };

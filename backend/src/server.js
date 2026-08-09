@@ -12,8 +12,11 @@ app.listen(env.port, () => {
   console.log(`Server listening on port ${env.port}`);
 });
 
-bot.launch();
-console.log('Telegram bot polling started');
+bot.launch().then(() => {
+  console.log('Telegram bot polling started');
+}).catch((err) => {
+  console.error('Telegram bot polling launch error (ignoring for web server):', err.message);
+});
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));

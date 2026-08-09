@@ -5745,6 +5745,12 @@ input, textarea, [contenteditable="true"] {
     cursor: pointer;
     box-shadow: 0 4px 14px var(--primary-glow);
     transition: transform 0.18s, box-shadow 0.18s;
+    position: relative;
+    z-index: 50;
+}
+
+.custom-topbar-add-btn * {
+    pointer-events: none;
 }
 
 .custom-topbar-add-btn:active {

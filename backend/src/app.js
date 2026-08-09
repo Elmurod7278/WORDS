@@ -6,6 +6,7 @@ const { createSessionRouter } = require('./routes/session.routes.js');
 const { createEventsRouter } = require('./routes/events.routes.js');
 const { createAdminRouter } = require('./routes/admin.routes.js');
 const { createUserRouter } = require('./routes/user.routes.js');
+const { createWordsRouter } = require('./routes/words.routes.js');
 const { adminAuth } = require('./middleware/adminAuth.js');
 const { errorHandler } = require('./middleware/errorHandler.js');
 
@@ -37,8 +38,10 @@ function createApp({ env, pool }) {
   app.use('/api/session', publicApiLimiter, createSessionRouter({ env, pool }));
   app.use('/api/events', publicApiLimiter, createEventsRouter({ pool }));
   app.use('/api/user', publicApiLimiter, createUserRouter({ pool }));
+  app.use('/api/words', publicApiLimiter, createWordsRouter({ pool }));
   app.use('/api/admin', adminLimiter, createAdminRouter({ env, pool }));
   app.use('/admin', adminAuth(env), express.static(path.join(__dirname, '..', 'admin')));
+  app.use(express.static(path.join(__dirname, '..', '..')));
 
   app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });

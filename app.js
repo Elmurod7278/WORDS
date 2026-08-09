@@ -919,24 +919,28 @@ function updateDirectionLabelsForActiveSetup() {
   if (dirChips.length < 2) return;
 
   const activeBook = state.activeSetupBook || Object.keys(dictionaryData)[0];
-  let srcMeta = { name: "Ingliz", flag: "🇬🇧", code: "en" };
-  let tgtMeta = { name: "O'zbek", flag: "🇺🇿", code: "uz" };
+  let srcCode = "en";
+  let tgtCode = "uz";
 
   if (activeBook && dictionaryData[activeBook]) {
     const units = Object.keys(dictionaryData[activeBook]);
     if (units.length > 0) {
       const firstUnitWords = dictionaryData[activeBook][units[0]] || [];
-      if (firstUnitWords.length > 0 && firstUnitWords[0]._srcLang && firstUnitWords[0]._tgtLang) {
-        const srcCode = firstUnitWords[0]._srcLang;
-        const tgtCode = firstUnitWords[0]._tgtLang;
-        srcMeta = LANG_META[srcCode] || { name: srcCode, flag: "🌐", code: srcCode };
-        tgtMeta = LANG_META[tgtCode] || { name: tgtCode, flag: "🌐", code: tgtCode };
+      if (firstUnitWords.length > 0) {
+        if (firstUnitWords[0]._srcLang) srcCode = firstUnitWords[0]._srcLang;
+        if (firstUnitWords[0]._tgtLang) tgtCode = firstUnitWords[0]._tgtLang;
       }
     }
   }
 
-  dirChips[0].innerHTML = `${srcMeta.flag} ${srcMeta.code.toUpperCase()} → ${tgtMeta.flag} ${tgtMeta.code.toUpperCase()}`;
-  dirChips[1].innerHTML = `${tgtMeta.flag} ${tgtMeta.code.toUpperCase()} → ${srcMeta.flag} ${srcMeta.code.toUpperCase()}`;
+  const srcMeta = LANG_META[srcCode] || { name: srcCode, flag: "🌐", code: srcCode };
+  const tgtMeta = LANG_META[tgtCode] || { name: tgtCode, flag: "🌐", code: tgtCode };
+
+  const srcStr = (srcMeta.code || srcCode || "en").toString().toUpperCase();
+  const tgtStr = (tgtMeta.code || tgtCode || "uz").toString().toUpperCase();
+
+  dirChips[0].innerHTML = `${srcMeta.flag || "🌐"} ${srcStr} → ${tgtMeta.flag || "🌐"} ${tgtStr}`;
+  dirChips[1].innerHTML = `${tgtMeta.flag || "🌐"} ${tgtStr} → ${srcMeta.flag || "🌐"} ${srcStr}`;
 }
 
 function syncDirectionGlider() {
@@ -4603,7 +4607,7 @@ function renderLibrarySelectionPhase() {
       const [src, tgt] = unitName.split("→");
       const srcMeta = LANG_META[src] || { flag: "🌐", name: src };
       const tgtMeta = LANG_META[tgt] || { flag: "🌐", name: tgt };
-      displayTitle = `${srcMeta.flag} ${srcMeta.code || src} → ${tgtMeta.flag}`;
+      displayTitle = `${srcMeta.flag} ${srcMeta.code || srcMeta.name || src} → ${tgtMeta.flag}`;
     }
 
     btn.innerHTML = `
@@ -4928,47 +4932,79 @@ const CUSTOM_BOOK_NAME = "🖊️ Mening Lug'atim";
 
 // Language metadata map
 const LANG_META = {
-  en: { name: "Ingliz", flag: "🇬🇧", bcp: "en-US" },
-  de: { name: "Nemis",  flag: "🇩🇪", bcp: "de-DE" },
-  fr: { name: "Fransuz",flag: "🇫🇷", bcp: "fr-FR" },
-  ru: { name: "Rus",    flag: "🇷🇺", bcp: "ru-RU" },
-  es: { name: "Ispan",  flag: "🇪🇸", bcp: "es-ES" },
-  tr: { name: "Turk",   flag: "🇹🇷", bcp: "tr-TR" },
-  ar: { name: "Arab",   flag: "🇸🇦", bcp: "ar-SA" },
-  ko: { name: "Koreys", flag: "🇰🇷", bcp: "ko-KR" },
-  zh: { name: "Xitoy",  flag: "🇨🇳", bcp: "zh-CN" },
-  it: { name: "Italyan",flag: "🇮🇹", bcp: "it-IT" },
-  ja: { name: "Yapon",  flag: "🇯🇵", bcp: "ja-JP" },
-  pt: { name: "Portugiz",flag: "🇧🇷", bcp: "pt-BR" },
-  uz: { name: "O'zbek", flag: "🇺🇿", bcp: "uz-UZ" },
+  en: { code: "en", name: "Ingliz", flag: "🇬🇧", bcp: "en-US" },
+  de: { code: "de", name: "Nemis",  flag: "🇩🇪", bcp: "de-DE" },
+  fr: { code: "fr", name: "Fransuz",flag: "🇫🇷", bcp: "fr-FR" },
+  ru: { code: "ru", name: "Rus",    flag: "🇷🇺", bcp: "ru-RU" },
+  es: { code: "es", name: "Ispan",  flag: "🇪🇸", bcp: "es-ES" },
+  tr: { code: "tr", name: "Turk",   flag: "🇹🇷", bcp: "tr-TR" },
+  ar: { code: "ar", name: "Arab",   flag: "🇸🇦", bcp: "ar-SA" },
+  ko: { code: "ko", name: "Koreys", flag: "🇰🇷", bcp: "ko-KR" },
+  zh: { code: "zh", name: "Xitoy",  flag: "🇨🇳", bcp: "zh-CN" },
+  it: { code: "it", name: "Italyan",flag: "🇮🇹", bcp: "it-IT" },
+  ja: { code: "ja", name: "Yapon",  flag: "🇯🇵", bcp: "ja-JP" },
+  pt: { code: "pt", name: "Portugiz",flag: "🇧🇷", bcp: "pt-BR" },
+  uz: { code: "uz", name: "O'zbek", flag: "🇺🇿", bcp: "uz-UZ" },
 };
 
-// ---- Storage helpers ----
+// ---- In-memory words cache (No localStorage storage for words) ----
+let customWordsCache = [];
+
 function loadCustomWords() {
-  try {
-    const raw = localStorage.getItem(CUSTOM_WORDS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
+  return customWordsCache;
 }
 
 function saveCustomWords(words) {
-  localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(words));
+  customWordsCache = Array.isArray(words) ? words : [];
+  try { localStorage.removeItem(CUSTOM_WORDS_KEY); } catch (e) {}
   syncCustomWordsToDictionary();
+  saveCustomWordsToServer(customWordsCache);
+}
+
+async function saveCustomWordsToServer(words) {
+  try {
+    await fetch('/api/words', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ words }),
+    });
+  } catch (e) {}
+}
+
+async function deleteCustomWordFromServer(wordId) {
+  try {
+    await fetch(`/api/words/${encodeURIComponent(wordId)}`, {
+      method: 'DELETE',
+    });
+  } catch (e) {}
+}
+
+async function syncCustomWordsWithServer() {
+  try {
+    try { localStorage.removeItem(CUSTOM_WORDS_KEY); } catch (e) {}
+    const res = await fetch('/api/words');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.words)) {
+        customWordsCache = data.words;
+        syncCustomWordsToDictionary();
+        if (typeof renderCustomWordsScreen === "function") renderCustomWordsScreen();
+      }
+    }
+  } catch (e) {}
 }
 
 function generateCustomWordId() {
   return "cw_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
 }
 
-// ---- Sync custom words into dictionaryData for quiz usage ----
+// ---- Sync custom words into dictionaryData for quiz & library usage ----
 function syncCustomWordsToDictionary() {
   const words = loadCustomWords();
 
   // Reset custom books in dictionaryData
   Object.keys(dictionaryData).forEach(key => {
-    if (key === CUSTOM_BOOK_NAME || key.startsWith("📁 ")) {
+    if (key === CUSTOM_BOOK_NAME || key.startsWith("📁 ") || key.includes(" - ") || key.startsWith("📖 ")) {
       delete dictionaryData[key];
     }
   });
@@ -4979,10 +5015,13 @@ function syncCustomWordsToDictionary() {
     return;
   }
 
-  // Group words by collection (if collection provided) or fallback to "🖊️ Mening Lug'atim"
-  const defaultGrouped = {};
-
+  // Group words by collection or create standalone Language Pair Books
   words.forEach(w => {
+    const src = w.srcLang || "en";
+    const tgt = w.tgtLang || "uz";
+    const srcMeta = LANG_META[src] || { flag: "🌐", name: src };
+    const tgtMeta = LANG_META[tgt] || { flag: "🌐", name: tgt };
+
     const item = {
       en: w.source,
       uz: w.target,
@@ -4991,27 +5030,27 @@ function syncCustomWordsToDictionary() {
       def: w.definition || "",
       ex: w.example || "",
       _customId: w.id,
-      _srcLang: w.srcLang,
-      _tgtLang: w.tgtLang,
+      _srcLang: src,
+      _tgtLang: tgt,
       _collection: w.collection || "",
     };
 
     if (w.collection) {
+      // Collection Book (e.g. 📁 A1 Daraja)
       const collBookName = `📁 ${w.collection}`;
       if (!dictionaryData[collBookName]) dictionaryData[collBookName] = {};
-      const unitKey = `${w.srcLang}→${w.tgtLang}`;
+      const unitKey = `${srcMeta.flag} ${srcMeta.name} → ${tgtMeta.flag} ${tgtMeta.name}`;
       if (!dictionaryData[collBookName][unitKey]) dictionaryData[collBookName][unitKey] = [];
       dictionaryData[collBookName][unitKey].push(item);
     } else {
-      const unitKey = `${w.srcLang}→${w.tgtLang}`;
-      if (!defaultGrouped[unitKey]) defaultGrouped[unitKey] = [];
-      defaultGrouped[unitKey].push(item);
+      // Standalone Language Pair Book (e.g. 🇩🇪 Nemis - 🇺🇿 O'zbek)
+      const langBookName = `${srcMeta.flag} ${srcMeta.name} - ${tgtMeta.flag} ${tgtMeta.name}`;
+      if (!dictionaryData[langBookName]) dictionaryData[langBookName] = {};
+      const unitKey = `Lug'atim (${srcMeta.name} → ${tgtMeta.name})`;
+      if (!dictionaryData[langBookName][unitKey]) dictionaryData[langBookName][unitKey] = [];
+      dictionaryData[langBookName][unitKey].push(item);
     }
   });
-
-  if (Object.keys(defaultGrouped).length > 0) {
-    dictionaryData[CUSTOM_BOOK_NAME] = defaultGrouped;
-  }
 
   if (typeof initSetupScreen === "function") initSetupScreen();
   if (typeof renderLibrarySelectionPhase === "function") renderLibrarySelectionPhase();
@@ -5132,6 +5171,7 @@ function renderCustomWordsScreen(filterText, filterLang) {
         () => {
           const words2 = loadCustomWords().filter(x => x.id !== w.id);
           saveCustomWords(words2);
+          deleteCustomWordFromServer(w.id);
           renderCustomWordsScreen(
             document.getElementById("custom-search-input")?.value || "",
             document.getElementById("custom-lang-filter")?.value || "all"
@@ -5291,7 +5331,7 @@ function getWordRowsFromModal() {
     const def = (card.querySelector(".row-def-input")?.value || "").trim();
     const ex = (card.querySelector(".row-ex-input")?.value || "").trim();
 
-    if (src || tgt) {
+    if (src && tgt) {
       result.push({
         source: src,
         target: tgt,
@@ -5376,8 +5416,8 @@ function saveCustomWordFromModal() {
   }
 
   const wordPairs = getWordRowsFromModal();
-  if (wordPairs.length === 0 || wordPairs.some(p => !p.source || !p.target)) {
-    showAppAlert("Maydon to'ldirilmagan", "Har bir so'z va tarjima maydoni to'ldirilishi kerak!");
+  if (wordPairs.length === 0) {
+    showAppAlert("Maydon to'ldirilmagan", "Iltimos, kamida bitta so'z va uning tarjimasini kiriting!");
     return;
   }
 
@@ -5554,17 +5594,36 @@ function goToPracticeWithCustomWords() {
 function initCustomWords() {
   // Initial sync
   syncCustomWordsToDictionary();
+  syncCustomWordsWithServer();
 
   // Render initial state
   renderCustomWordsScreen("", "all");
 
-  // ---- Add Word Button (topbar +) ----
+  // ---- Add Word Buttons (topbar +, empty state, etc) ----
   const addBtn = document.getElementById("custom-open-add-modal-btn");
-  if (addBtn) addBtn.addEventListener("click", () => openCustomWordModal(null));
+  if (addBtn) {
+    addBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openCustomWordModal(null);
+    });
+  }
 
-  // ---- Empty state add button ----
   const emptyAddBtn = document.getElementById("custom-empty-add-btn");
-  if (emptyAddBtn) emptyAddBtn.addEventListener("click", () => openCustomWordModal(null));
+  if (emptyAddBtn) {
+    emptyAddBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openCustomWordModal(null);
+    });
+  }
+
+  // Document-level fallback delegation for add word buttons
+  document.addEventListener("click", (e) => {
+    const targetAddBtn = e.target.closest("#custom-open-add-modal-btn, .custom-topbar-add-btn, #custom-empty-add-btn");
+    if (targetAddBtn) {
+      e.preventDefault();
+      openCustomWordModal(null);
+    }
+  });
 
   // ---- Search ----
   const searchInput = document.getElementById("custom-search-input");
