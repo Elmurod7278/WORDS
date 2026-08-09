@@ -4,43 +4,23 @@ async function ensureDeviceIdColumn(pool) {
   } catch (e) {}
 }
 
-function hashStringToNum(str) {
-  if (!str) return 90000000;
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash) + 10000000;
-}
+
 
 async function resolveInternalUserId(pool, rawId, deviceId = null) {
   if (rawId) {
     const num = parseInt(rawId, 10);
     if (!isNaN(num) && num > 0) {
       try {
-        // 1. First check if rawId matches an existing users.id (integer primary key)
+        // 1. Check if rawId matches an existing users.id (integer primary key)
         const byId = await pool.query(`SELECT id FROM users WHERE id = $1 LIMIT 1;`, [num]);
         if (byId.rows.length > 0) {
           return byId.rows[0].id;
         }
 
-        // 2. Next check if rawId matches an existing users.telegram_id (bigint)
+        // 2. Check if rawId matches an existing users.telegram_id (bigint)
         const byTg = await pool.query(`SELECT id FROM users WHERE telegram_id = $1 LIMIT 1;`, [num]);
         if (byTg.rows.length > 0) {
           return byTg.rows[0].id;
-        }
-
-        // 3. Create user in users table with telegram_id = num and return new users.id
-        const newUser = await pool.query(
-          `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
-           VALUES ($1, NOW(), NOW())
-           ON CONFLICT (telegram_id) DO UPDATE SET last_seen_at = NOW()
-           RETURNING id;`,
-          [num]
-        );
-        if (newUser.rows.length > 0) {
-          return newUser.rows[0].id;
         }
       } catch (e) {
         console.error("Failed to resolve user_id in users table:", e);
@@ -48,7 +28,7 @@ async function resolveInternalUserId(pool, rawId, deviceId = null) {
     }
   }
 
-  // 4. If rawId is null or invalid, check deviceId mapping
+  // 3. If rawId is null or invalid, check deviceId mapping
   if (deviceId) {
     try {
       const knownUserRes = await pool.query(
@@ -61,7 +41,7 @@ async function resolveInternalUserId(pool, rawId, deviceId = null) {
     } catch (e) {}
   }
 
-  // Strict User Privacy Isolation: Return null if no identity found (NEVER leak another user's data)
+  // Strict User Privacy Isolation: Return null if no identity found (NEVER insert dummy user rows)
   return null;
 }
 
@@ -92,25 +72,7 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
   // Security Constraint: Cap maximum batch count per request to 150 items to prevent big data floods
   const safeWordsBatch = words.slice(0, 150);
 
-  let internalUserId = await resolveInternalUserId(pool, userId, deviceId);
-
-  // If still no internalUserId, create a dedicated device user so words belong strictly to THIS device/user
-  if (!internalUserId && deviceId) {
-    try {
-      const devTgId = hashStringToNum(deviceId);
-      const newDevUser = await pool.query(
-        `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
-         VALUES ($1, NOW(), NOW())
-         ON CONFLICT (telegram_id) DO UPDATE SET last_seen_at = NOW()
-         RETURNING id;`,
-        [devTgId]
-      );
-      if (newDevUser.rows[0]) {
-        internalUserId = newDevUser.rows[0].id;
-      }
-    } catch (e) {}
-  }
-
+  const internalUserId = await resolveInternalUserId(pool, userId, deviceId);
   if (!internalUserId) return [];
 
   const numSession = sessionId ? parseInt(sessionId, 10) : null;
