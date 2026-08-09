@@ -5069,12 +5069,29 @@ function saveCustomWords(words) {
   saveCustomWordsToServer(customWordsCache);
 }
 
+function getOrCreateDeviceId() {
+  let devId = null;
+  try {
+    devId = localStorage.getItem("words_client_device_id");
+    if (!devId) {
+      devId = "dev_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem("words_client_device_id", devId);
+    }
+  } catch (e) {
+    devId = "dev_anon";
+  }
+  return devId;
+}
+
 async function saveCustomWordsToServer(words) {
   try {
     await fetch('/api/words', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ words }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Id': getOrCreateDeviceId(),
+      },
+      body: JSON.stringify({ words, device_id: getOrCreateDeviceId() }),
     });
   } catch (e) {}
 }
@@ -5083,6 +5100,9 @@ async function deleteCustomWordFromServer(wordId) {
   try {
     await fetch(`/api/words/${encodeURIComponent(wordId)}`, {
       method: 'DELETE',
+      headers: {
+        'X-Device-Id': getOrCreateDeviceId(),
+      },
     });
   } catch (e) {}
 }
@@ -5090,7 +5110,11 @@ async function deleteCustomWordFromServer(wordId) {
 async function syncCustomWordsWithServer() {
   try {
     try { localStorage.removeItem(CUSTOM_WORDS_KEY); } catch (e) {}
-    const res = await fetch('/api/words');
+    const res = await fetch(`/api/words?device_id=${encodeURIComponent(getOrCreateDeviceId())}`, {
+      headers: {
+        'X-Device-Id': getOrCreateDeviceId(),
+      },
+    });
     if (res.ok) {
       const data = await res.json();
       if (data && Array.isArray(data.words)) {
