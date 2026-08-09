@@ -6461,6 +6461,50 @@ input, textarea, [contenteditable="true"] {
     border-color: var(--primary);
 }
 
+/* Modal Mode Switcher Tabs (Bittalab kiritish vs Ko'plab kiritish) */
+.cw-modal-mode-tabs {
+    display: flex;
+    background: hsla(222, 47%, 12%, 0.8);
+    border: 1px solid var(--input-border);
+    border-radius: 9px;
+    padding: 3px;
+    margin-top: 2px;
+    margin-bottom: 8px;
+    gap: 4px;
+}
+
+.cw-mode-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 30px;
+    padding: 3px 8px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.cw-mode-tab:hover {
+    color: var(--text-main);
+    background: hsla(var(--h-primary), 84%, 67%, 0.12);
+}
+
+.cw-mode-tab.active {
+    background: linear-gradient(135deg, var(--primary) 0%, hsla(var(--h-primary), 84%, 60%, 1) 100%);
+    color: #ffffff !important;
+    border-color: var(--primary);
+    box-shadow: 0 3px 10px var(--primary-glow);
+    font-weight: 700;
+}
+
 .cw-row-remove-btn {
     display: flex;
     align-items: center;
