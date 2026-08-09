@@ -21,8 +21,8 @@ function getWelcomePhoto(env) {
 }
 
 const WELCOME_CAPTION =
-  "✨ <b>WORDS — Zamonaviy Ko'p Tilli Lug'at & Amaliyot Ilovasi</b> 🌐\n\n" +
-  "<b>WORDS</b> — chet tillarini (Ingliz, Arab, Rus, Nemis, Fransuz, Turk va b.) oson va samarali o'rganish uchun yaratilgan interaktiv Telegram Mini App ilovasi! 🚀\n\n" +
+  "✨ <b>@my_dictionary_robot — Zamonaviy Ko'p Tilli Lug'at & Amaliyot Ilovasi</b> 🌐\n\n" +
+  "<b>@my_dictionary_robot</b> — chet tillarini (Ingliz, Arab, Rus, Nemis, Fransuz, Turk va b.) oson va samarali o'rganish uchun yaratilgan interaktiv Telegram Mini App ilovasi! 🚀\n\n" +
   "<b>💡 Asosiy Imkoniyatlar:</b>\n" +
   "📖 <b>Shaxsiy Lug'at</b> — O'zingiz xohlagan so'zlar va to'plamlarni kiritib boring\n" +
   "📁 <b>To'plamlar (Units)</b> — So'zlaringizni guruhlab, to'plam tarzida tahrirlang\n" +
