@@ -5306,7 +5306,7 @@ function syncCustomWordsToDictionary() {
 }
 
 // ---- Render word cards on custom-screen ----
-function renderCustomWordsScreen(filterText, filterLang) {
+function renderCustomWordsScreen(filterText, filterLang, filterColl) {
   const words = loadCustomWords();
   const list = document.getElementById("custom-words-list");
   const emptyState = document.getElementById("custom-empty-state");
@@ -5329,6 +5329,36 @@ function renderCustomWordsScreen(filterText, filterLang) {
   if (langsEl) langsEl.textContent = langPairs.size;
   if (collEl) collEl.textContent = collections.size;
 
+  // Update Collection Filter Dropdown
+  const collWrap = document.getElementById("custom-coll-filter-wrap");
+  const collSelect = document.getElementById("custom-coll-filter");
+  const collEditBtn = document.getElementById("custom-coll-edit-btn");
+
+  const activeColl = filterColl !== undefined ? filterColl : (collSelect ? collSelect.value : "all");
+
+  if (collWrap && collSelect) {
+    if (collections.size > 0) {
+      collWrap.style.display = "flex";
+      collSelect.innerHTML = `<option value="all">📁 Barcha to'plamlar (${sortedWords.length} so'z)</option>`;
+      
+      collections.forEach(collName => {
+        const count = sortedWords.filter(x => x.collection === collName).length;
+        const opt = document.createElement("option");
+        opt.value = collName;
+        opt.textContent = `📁 ${collName} (${count} so'z)`;
+        collSelect.appendChild(opt);
+      });
+
+      collSelect.value = collections.has(activeColl) ? activeColl : "all";
+
+      if (collEditBtn) {
+        collEditBtn.style.display = collSelect.value !== "all" ? "inline-flex" : "none";
+      }
+    } else {
+      collWrap.style.display = "none";
+    }
+  }
+
   // Apply filters
   let filtered = sortedWords;
   const q = (filterText || "").trim().toLowerCase();
@@ -5341,6 +5371,9 @@ function renderCustomWordsScreen(filterText, filterLang) {
   }
   if (filterLang && filterLang !== "all") {
     filtered = filtered.filter(w => w.srcLang === filterLang || w.tgtLang === filterLang);
+  }
+  if (collSelect && collSelect.value && collSelect.value !== "all") {
+    filtered = filtered.filter(w => w.collection === collSelect.value);
   }
 
   // Update lang filter dropdown
@@ -5358,28 +5391,6 @@ function renderCustomWordsScreen(filterText, filterLang) {
       langFilterEl.appendChild(opt);
     });
     langFilterEl.value = currentVal;
-  }
-
-  // Render Top Collections Bar
-  const collBar = document.getElementById("custom-collections-bar");
-  if (collBar) {
-    collBar.innerHTML = "";
-    if (collections.size > 0) {
-      collBar.style.display = "flex";
-      collections.forEach(collName => {
-        const collWordsCount = sortedWords.filter(x => x.collection === collName).length;
-        const chip = document.createElement("div");
-        chip.className = "custom-coll-chip";
-        chip.title = `'${collName}' to'plami va uning barcha so'zlarini tahrirlash`;
-        chip.innerHTML = `<span>📁 ${escapeHTML(collName)}</span><span style="opacity:0.75; font-size:0.75rem;">(${collWordsCount} so'z)</span> <span class="edit-icon">✏️</span>`;
-        chip.addEventListener("click", () => {
-          openEditCollectionModal(collName);
-        });
-        collBar.appendChild(chip);
-      });
-    } else {
-      collBar.style.display = "none";
-    }
   }
 
   // Empty state handling
@@ -6170,7 +6181,11 @@ function initCustomWords() {
   const searchInput = document.getElementById("custom-search-input");
   if (searchInput) {
     searchInput.addEventListener("input", () => {
-      renderCustomWordsScreen(searchInput.value, document.getElementById("custom-lang-filter")?.value || "all");
+      renderCustomWordsScreen(
+        searchInput.value,
+        document.getElementById("custom-lang-filter")?.value || "all",
+        document.getElementById("custom-coll-filter")?.value || "all"
+      );
     });
   }
 
@@ -6178,7 +6193,33 @@ function initCustomWords() {
   const langFilter = document.getElementById("custom-lang-filter");
   if (langFilter) {
     langFilter.addEventListener("change", () => {
-      renderCustomWordsScreen(document.getElementById("custom-search-input")?.value || "", langFilter.value);
+      renderCustomWordsScreen(
+        document.getElementById("custom-search-input")?.value || "",
+        langFilter.value,
+        document.getElementById("custom-coll-filter")?.value || "all"
+      );
+    });
+  }
+
+  // ---- Collection Filter Dropdown & Edit Button ----
+  const collFilter = document.getElementById("custom-coll-filter");
+  if (collFilter) {
+    collFilter.addEventListener("change", () => {
+      renderCustomWordsScreen(
+        document.getElementById("custom-search-input")?.value || "",
+        document.getElementById("custom-lang-filter")?.value || "all",
+        collFilter.value
+      );
+    });
+  }
+
+  const collEditBtn = document.getElementById("custom-coll-edit-btn");
+  if (collEditBtn) {
+    collEditBtn.addEventListener("click", () => {
+      const selectedColl = document.getElementById("custom-coll-filter")?.value;
+      if (selectedColl && selectedColl !== "all") {
+        openEditCollectionModal(selectedColl);
+      }
     });
   }
 
