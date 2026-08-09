@@ -5689,9 +5689,17 @@ function openCustomWordModal(editId) {
     const defaultTgt = lastWord?.tgtLang || localStorage.getItem("vocab_last_tgtlang") || "uz";
     const defaultColl = lastWord?.collection !== undefined ? lastWord.collection : (localStorage.getItem("vocab_last_collection") || "");
 
+    const bulkSrcSel = document.getElementById("bulk-source-lang");
+    const bulkTgtSel = document.getElementById("bulk-target-lang");
+    const bulkCollInput = document.getElementById("bulk-collection");
+
     if (srcLangSel) srcLangSel.value = defaultSrc;
     if (tgtLangSel) tgtLangSel.value = defaultTgt;
     if (collInput) collInput.value = defaultColl;
+
+    if (bulkSrcSel) bulkSrcSel.value = defaultSrc;
+    if (bulkTgtSel) bulkTgtSel.value = defaultTgt;
+    if (bulkCollInput) bulkCollInput.value = defaultColl;
 
     // 1 empty row
     addWordRowToModal("", "", "", "", "");
@@ -6098,6 +6106,13 @@ function saveBulkWords() {
     return;
   }
 
+  // Save last used languages and collection for future word additions
+  try {
+    localStorage.setItem("vocab_last_srclang", srcLang);
+    localStorage.setItem("vocab_last_tgtlang", tgtLang);
+    if (collection) localStorage.setItem("vocab_last_collection", collection);
+  } catch (e) {}
+
   const existing = loadCustomWords();
   const merged = [...existing, ...parsed];
   saveCustomWords(merged);
@@ -6220,6 +6235,41 @@ function initCustomWords() {
       if (selectedColl && selectedColl !== "all") {
         openEditCollectionModal(selectedColl);
       }
+    });
+  }
+
+  // ---- Language change listeners to sync & remember last used language pair ----
+  const cwSrc = document.getElementById("cw-source-lang");
+  const cwTgt = document.getElementById("cw-target-lang");
+  const bulkSrc = document.getElementById("bulk-source-lang");
+  const bulkTgt = document.getElementById("bulk-target-lang");
+
+  if (cwSrc) {
+    cwSrc.addEventListener("change", () => {
+      try { localStorage.setItem("vocab_last_srclang", cwSrc.value); } catch(e) {}
+      if (bulkSrc) bulkSrc.value = cwSrc.value;
+      updateModalLangLabels();
+    });
+  }
+  if (cwTgt) {
+    cwTgt.addEventListener("change", () => {
+      try { localStorage.setItem("vocab_last_tgtlang", cwTgt.value); } catch(e) {}
+      if (bulkTgt) bulkTgt.value = cwTgt.value;
+      updateModalLangLabels();
+    });
+  }
+  if (bulkSrc) {
+    bulkSrc.addEventListener("change", () => {
+      try { localStorage.setItem("vocab_last_srclang", bulkSrc.value); } catch(e) {}
+      if (cwSrc) cwSrc.value = bulkSrc.value;
+      updateModalLangLabels();
+    });
+  }
+  if (bulkTgt) {
+    bulkTgt.addEventListener("change", () => {
+      try { localStorage.setItem("vocab_last_tgtlang", bulkTgt.value); } catch(e) {}
+      if (cwTgt) cwTgt.value = bulkTgt.value;
+      updateModalLangLabels();
     });
   }
 
