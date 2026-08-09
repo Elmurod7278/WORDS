@@ -51,24 +51,13 @@ async function resolveInternalUserId(pool, rawId, deviceId = null) {
     } catch (e) {}
   }
 
-  // 5. Guaranteed fallback: Ensure a default fallback user exists in users table and return its ID
-  try {
-    const defaultUser = await pool.query(
-      `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
-       VALUES (999999999, NOW(), NOW())
-       ON CONFLICT (telegram_id) DO UPDATE SET last_seen_at = NOW()
-       RETURNING id;`
-    );
-    if (defaultUser.rows.length > 0) return defaultUser.rows[0].id;
-  } catch (e) {}
-
-  // Ultimate fallback to first row in users table
+  // 5. Fallback to existing registered user in users table without inserting any dummy rows
   try {
     const fallback = await pool.query(`SELECT id FROM users ORDER BY id ASC LIMIT 1;`);
     if (fallback.rows.length > 0) return fallback.rows[0].id;
   } catch (e) {}
 
-  return 1; // Guaranteed non-null integer
+  return 1; // Fallback integer
 }
 
 async function getWords({ pool, userId, sessionId, deviceId }) {
