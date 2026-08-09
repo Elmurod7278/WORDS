@@ -823,19 +823,48 @@ function renderActiveBookPanel() {
   `;
   
   const gridContainer = document.getElementById("active-units-grid");
+  if (!gridContainer) return;
+
+  const isCustomBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
+
+  if (isCustomBook) {
+    gridContainer.style.display = "flex";
+    gridContainer.style.flexWrap = "wrap";
+    gridContainer.style.gap = "8px";
+    gridContainer.style.padding = "6px 0";
+  } else {
+    gridContainer.style.display = "grid";
+    gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
+    gridContainer.style.gap = "4px";
+    gridContainer.style.padding = "2px 0";
+  }
+
   unitNames.forEach(unitName => {
     const compositeKey = `${activeBookName}|||${unitName}`;
     const unitWords = bookUnits[unitName].length;
-    const unitNum = unitName.replace("Unit ", "");
+    const isSelected = state.selectedUnits.includes(compositeKey);
+    const chipId = `active-unit-chip-${unitName.replace(/[^a-zA-Z0-9_\-]/g, "-")}`;
     
     const chip = document.createElement("button");
     chip.type = "button";
-    chip.className = "unit-chip";
-    chip.id = `active-unit-chip-${unitName.replace(/\s+/g, "-")}`;
-    chip.innerHTML = `
-      <span>${unitNum}</span>
-      <span class="unit-chip-meta">${unitWords}</span>
-    `;
+    chip.id = chipId;
+
+    if (isCustomBook) {
+      chip.className = `unit-chip custom-coll-unit-chip ${isSelected ? "selected" : ""}`;
+      const cleanName = unitName.replace(/^📁\s*/, "");
+      chip.innerHTML = `
+        <span class="custom-unit-icon">📁</span>
+        <span class="custom-unit-title">${escapeHTML(cleanName)}</span>
+        <span class="unit-chip-meta custom-unit-badge">${unitWords}</span>
+      `;
+    } else {
+      const unitNum = unitName.replace("Unit ", "");
+      chip.className = `unit-chip ${isSelected ? "selected" : ""}`;
+      chip.innerHTML = `
+        <span>${escapeHTML(unitNum)}</span>
+        <span class="unit-chip-meta">${unitWords}</span>
+      `;
+    }
     
     chip.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -853,7 +882,7 @@ function syncSetupScreenUI() {
     const tabBtn = document.getElementById(`book-tab-${idx}`);
     if (!tabBtn) return;
     
-    const allUnits = Object.keys(dictionaryData[bookName]);
+    const allUnits = Object.keys(dictionaryData[bookName] || {});
     const selectedUnitsForBook = state.selectedUnits.filter(key => key.startsWith(bookName + "|||"));
     const selectedCount = selectedUnitsForBook.length;
     
@@ -861,36 +890,24 @@ function syncSetupScreenUI() {
     
     const badge = tabBtn.querySelector(".tab-badge");
     if (badge) {
-      if (selectedCount === allUnits.length) {
+      if (selectedCount === allUnits.length && allUnits.length > 0) {
         badge.innerHTML = "✓";
-        badge.className = "tab-badge selected-all";
-        badge.style.display = "flex";
+        badge.style.display = "inline-flex";
       } else if (selectedCount > 0) {
         badge.innerHTML = selectedCount;
-        badge.className = "tab-badge selected-some";
-        badge.style.display = "flex";
+        badge.style.display = "inline-flex";
       } else {
         badge.style.display = "none";
       }
     }
   });
   
-  const activeBookName = state.activeSetupBook;
-  const activeIndex = books.indexOf(activeBookName);
-  if (activeIndex > -1) {
-    const allUnits = Object.keys(dictionaryData[activeBookName]);
-    const selectedUnitsForBook = state.selectedUnits.filter(key => key.startsWith(activeBookName + "|||"));
-    const selectedCount = selectedUnitsForBook.length;
-    
-    const checkbox = document.getElementById("active-book-chk");
-    if (checkbox) {
-      checkbox.classList.toggle("checked", selectedCount > 0);
-    }
-    
+  if (state.activeSetupBook && dictionaryData[state.activeSetupBook]) {
+    const allUnits = Object.keys(dictionaryData[state.activeSetupBook]);
     allUnits.forEach(unitName => {
-      const compositeKey = `${activeBookName}|||${unitName}`;
+      const compositeKey = `${state.activeSetupBook}|||${unitName}`;
       const isSelected = state.selectedUnits.includes(compositeKey);
-      const chipId = `active-unit-chip-${unitName.replace(/\s+/g, "-")}`;
+      const chipId = `active-unit-chip-${unitName.replace(/[^a-zA-Z0-9_\-]/g, "-")}`;
       const chip = document.getElementById(chipId);
       if (chip) {
         chip.classList.toggle("selected", isSelected);
