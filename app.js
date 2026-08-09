@@ -825,19 +825,10 @@ function renderActiveBookPanel() {
   const gridContainer = document.getElementById("active-units-grid");
   if (!gridContainer) return;
 
-  const isCustomBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
-
-  if (isCustomBook) {
-    gridContainer.style.display = "flex";
-    gridContainer.style.flexWrap = "wrap";
-    gridContainer.style.gap = "8px";
-    gridContainer.style.padding = "6px 0";
-  } else {
-    gridContainer.style.display = "grid";
-    gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
-    gridContainer.style.gap = "4px";
-    gridContainer.style.padding = "2px 0";
-  }
+  gridContainer.style.display = "grid";
+  gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
+  gridContainer.style.gap = "4px";
+  gridContainer.style.padding = "2px 0";
 
   unitNames.forEach(unitName => {
     const compositeKey = `${activeBookName}|||${unitName}`;
@@ -848,23 +839,16 @@ function renderActiveBookPanel() {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.id = chipId;
+    chip.className = `unit-chip ${isSelected ? "selected" : ""}`;
 
-    if (isCustomBook) {
-      chip.className = `unit-chip custom-coll-unit-chip ${isSelected ? "selected" : ""}`;
-      const cleanName = unitName.replace(/^📁\s*/, "");
-      chip.innerHTML = `
-        <span class="custom-unit-icon">📁</span>
-        <span class="custom-unit-title">${escapeHTML(cleanName)}</span>
-        <span class="unit-chip-meta custom-unit-badge">${unitWords}</span>
-      `;
-    } else {
-      const unitNum = unitName.replace("Unit ", "");
-      chip.className = `unit-chip ${isSelected ? "selected" : ""}`;
-      chip.innerHTML = `
-        <span>${escapeHTML(unitNum)}</span>
-        <span class="unit-chip-meta">${unitWords}</span>
-      `;
-    }
+    const cleanTitle = unitName.replace(/^📁\s*/, "");
+    const isLongText = cleanTitle.length > 4;
+    const fontSz = isLongText ? (cleanTitle.length > 7 ? "0.45rem" : "0.52rem") : "0.68rem";
+
+    chip.innerHTML = `
+      <span style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96%; display: block; line-height: 1.1;">${escapeHTML(cleanTitle)}</span>
+      <span class="unit-chip-meta">${unitWords}</span>
+    `;
     
     chip.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -4727,7 +4711,7 @@ function renderLibrarySelectionPhase() {
     btn.className = `library-unit-btn ${isActive ? "active" : ""}`;
 
     // Clean display title
-    let displayTitle = unitName;
+    let displayTitle = unitName.replace(/^📁\s*/, "");
     if (unitName.includes("→")) {
       const [src, tgt] = unitName.split("→");
       const srcMeta = LANG_META[src] || { flag: "🌐", name: src };
@@ -4735,8 +4719,11 @@ function renderLibrarySelectionPhase() {
       displayTitle = `${srcMeta.flag} ${srcMeta.code || srcMeta.name || src} → ${tgtMeta.flag}`;
     }
 
+    const isLong = displayTitle.length > 4;
+    const fontSz = isLong ? (displayTitle.length > 7 ? "0.52rem" : "0.60rem") : "0.85rem";
+
     btn.innerHTML = `
-      <span class="library-unit-num" style="font-size: ${displayTitle.length > 8 ? '0.78rem' : '0.95rem'}">${displayTitle}</span>
+      <span class="library-unit-num" style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96%; display: block; line-height: 1.1;">${escapeHTML(displayTitle)}</span>
       <span class="library-unit-count">${wordCount} so'z</span>
     `;
     btn.addEventListener("click", () => {
