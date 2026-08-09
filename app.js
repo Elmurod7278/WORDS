@@ -5638,9 +5638,13 @@ function closeCollectionModal() {
 function addCollectionWordRow(container, wordObj = null) {
   const src = wordObj ? wordObj.source : "";
   const tgt = wordObj ? wordObj.target : "";
+  const trans = wordObj ? (wordObj.transcription || "") : "";
+  const def = wordObj ? (wordObj.definition || "") : "";
+  const ex = wordObj ? (wordObj.example || "") : "";
   const id = wordObj ? wordObj.id : generateCustomWordId();
   const srcLang = wordObj ? wordObj.srcLang : "en";
   const tgtLang = wordObj ? wordObj.tgtLang : "uz";
+  const hasOptionalData = !!(trans || def || ex);
 
   const card = document.createElement("div");
   card.className = "cw-word-row-card coll-word-item";
@@ -5659,12 +5663,37 @@ function addCollectionWordRow(container, wordObj = null) {
         </div>
       </div>
       <div class="cw-word-row-actions">
+        <button type="button" class="cw-row-opt-toggle-btn ${hasOptionalData ? 'active' : ''}" title="Qo'shimcha ma'lumotlar (Transkripsiya, Izoh, Misol...)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83 2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <button type="button" class="cw-row-remove-btn coll-row-del-btn" title="So'zni o'chirish" style="display: flex;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
+    <div class="cw-word-row-optional" style="display: ${hasOptionalData ? 'flex' : 'none'}; flex-direction: column; gap: 8px; padding-top: 8px;">
+      <div class="cw-field">
+        <label class="cw-label">Transkripsiya <span class="cw-optional">(opsional)</span></label>
+        <input type="text" class="cw-input coll-trans-input" placeholder="e.g. [ǽpl]" value="${escapeHTML(trans)}" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="cw-field">
+        <label class="cw-label">Izoh / Ta'rif <span class="cw-optional">(opsional)</span></label>
+        <textarea class="cw-textarea coll-def-input" placeholder="So'zning izohi..." rows="2">${escapeHTML(def)}</textarea>
+      </div>
+      <div class="cw-field">
+        <label class="cw-label">Misol gap <span class="cw-optional">(opsional)</span></label>
+        <textarea class="cw-textarea coll-ex-input" placeholder="So'zni ishlatgan misol gap..." rows="2">${escapeHTML(ex)}</textarea>
+      </div>
+    </div>
   `;
+
+  const optToggleBtn = card.querySelector(".cw-row-opt-toggle-btn");
+  const optBody = card.querySelector(".cw-word-row-optional");
+  optToggleBtn.addEventListener("click", () => {
+    const isOpen = optBody.style.display !== "none";
+    optBody.style.display = isOpen ? "none" : "flex";
+    optToggleBtn.classList.toggle("active", !isOpen);
+  });
 
   card.querySelector(".coll-row-del-btn").addEventListener("click", () => {
     card.remove();
@@ -5705,6 +5734,9 @@ async function saveCollectionEditModal() {
     const tgtLang = card.dataset.tgtLang || "uz";
     const src = (card.querySelector(".coll-src-input")?.value || "").trim();
     const tgt = (card.querySelector(".coll-tgt-input")?.value || "").trim();
+    const trans = (card.querySelector(".coll-trans-input")?.value || "").trim();
+    const def = (card.querySelector(".coll-def-input")?.value || "").trim();
+    const ex = (card.querySelector(".coll-ex-input")?.value || "").trim();
 
     if (src && tgt) {
       activeIds.add(wordId);
@@ -5714,6 +5746,9 @@ async function saveCollectionEditModal() {
         tgtLang,
         source: src,
         target: tgt,
+        transcription: trans,
+        definition: def,
+        example: ex,
         collection: newName,
         createdAt: Date.now(),
       });
