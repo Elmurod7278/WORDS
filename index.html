@@ -894,8 +894,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <div class="cw-modal-body">
-                <!-- Mode Switcher Tabs: Bittalab kiritish (Default) vs Ko'plab kiritish -->
+            <div class="cw-modal-body" style="padding-top: 10px;">
+                <!-- Mode Switcher Tabs (Pinned at top of modal) -->
                 <div class="cw-modal-mode-tabs">
                     <button type="button" class="cw-mode-tab active" id="cw-mode-tab-single">
                         📝 Bittalab kiritish
@@ -905,67 +905,130 @@
                     </button>
                 </div>
 
-                <!-- Languages row -->
-                <div class="cw-field-group cw-langs-row">
-                    <div class="cw-field">
-                        <label class="cw-label">Manba tili (So'z tili)</label>
-                        <select id="cw-source-lang" class="cw-select">
-                            <option value="en">🇬🇧 Ingliz</option>
-                            <option value="de">🇩🇪 Nemis</option>
-                            <option value="fr">🇫🇷 Fransuz</option>
-                            <option value="ru">🇷🇺 Rus</option>
-                            <option value="es">🇪🇸 Ispan</option>
-                            <option value="tr">🇹🇷 Turk</option>
-                            <option value="ar">🇸🇦 Arab</option>
-                            <option value="ko">🇰🇷 Koreys</option>
-                            <option value="zh">🇨🇳 Xitoy</option>
-                            <option value="it">🇮🇹 Italyan</option>
-                            <option value="ja">🇯🇵 Yapon</option>
-                            <option value="pt">🇧🇷 Portugiz</option>
-                            <option value="uz">🇺🇿 O'zbek</option>
-                        </select>
+                <!-- VIEW 1: Bittalab kiritish (Single / Dynamic rows) -->
+                <div id="cw-single-form-view">
+                    <!-- Languages row -->
+                    <div class="cw-field-group cw-langs-row">
+                        <div class="cw-field">
+                            <label class="cw-label">Manba tili (So'z tili)</label>
+                            <select id="cw-source-lang" class="cw-select">
+                                <option value="en">🇬🇧 Ingliz</option>
+                                <option value="de">🇩🇪 Nemis</option>
+                                <option value="fr">🇫🇷 Fransuz</option>
+                                <option value="ru">🇷🇺 Rus</option>
+                                <option value="es">🇪🇸 Ispan</option>
+                                <option value="tr">🇹🇷 Turk</option>
+                                <option value="ar">🇸🇦 Arab</option>
+                                <option value="ko">🇰🇷 Koreys</option>
+                                <option value="zh">🇨🇳 Xitoy</option>
+                                <option value="it">🇮🇹 Italyan</option>
+                                <option value="ja">🇯🇵 Yapon</option>
+                                <option value="pt">🇧🇷 Portugiz</option>
+                                <option value="uz">🇺🇿 O'zbek</option>
+                            </select>
+                        </div>
+                        <div class="cw-lang-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </div>
+                        <div class="cw-field">
+                            <label class="cw-label">Tarjima tili</label>
+                            <select id="cw-target-lang" class="cw-select">
+                                <option value="uz">🇺🇿 O'zbek</option>
+                                <option value="en">🇬🇧 Ingliz</option>
+                                <option value="ru">🇷🇺 Rus</option>
+                                <option value="de">🇩🇪 Nemis</option>
+                                <option value="fr">🇫🇷 Fransuz</option>
+                                <option value="es">🇪🇸 Ispan</option>
+                                <option value="tr">🇹🇷 Turk</option>
+                                <option value="ar">🇸🇦 Arab</option>
+                                <option value="ko">🇰🇷 Koreys</option>
+                                <option value="zh">🇨🇳 Xitoy</option>
+                                <option value="it">🇮🇹 Italyan</option>
+                                <option value="ja">🇯🇵 Yapon</option>
+                                <option value="pt">🇧🇷 Portugiz</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="cw-lang-arrow">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+
+                    <!-- Dynamic word rows container -->
+                    <div class="cw-words-container" id="cw-words-container">
+                        <!-- Dynamic word row item with per-word optional accordion -->
                     </div>
-                    <div class="cw-field">
-                        <label class="cw-label">Tarjima tili</label>
-                        <select id="cw-target-lang" class="cw-select">
-                            <option value="uz">🇺🇿 O'zbek</option>
-                            <option value="en">🇬🇧 Ingliz</option>
-                            <option value="ru">🇷🇺 Rus</option>
-                            <option value="de">🇩🇪 Nemis</option>
-                            <option value="fr">🇫🇷 Fransuz</option>
-                            <option value="es">🇪🇸 Ispan</option>
-                            <option value="tr">🇹🇷 Turk</option>
-                            <option value="ar">🇸🇦 Arab</option>
-                            <option value="ko">🇰🇷 Koreys</option>
-                            <option value="zh">🇨🇳 Xitoy</option>
-                            <option value="it">🇮🇹 Italyan</option>
-                            <option value="ja">🇯🇵 Yapon</option>
-                            <option value="pt">🇧🇷 Portugiz</option>
-                        </select>
+
+                    <!-- Button to dynamically add another word row -->
+                    <div style="margin-top: 6px; margin-bottom: 6px;">
+                        <button type="button" class="cw-add-row-btn" id="cw-add-row-btn" style="width: 100%;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            ➕ Yana so'z qo'shish
+                        </button>
+                    </div>
+
+                    <!-- Collection name for this batch (optional) -->
+                    <div class="cw-field" style="margin-top: 4px;">
+                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
+                        <input type="text" id="cw-collection" class="cw-input" placeholder="e.g. Ish so'zlari, A2 daraja..." autocomplete="off" list="cw-collection-datalist">
+                        <datalist id="cw-collection-datalist"></datalist>
                     </div>
                 </div>
 
-                <!-- Dynamic word rows container -->
-                <div class="cw-words-container" id="cw-words-container">
-                    <!-- Dynamic word row item with per-word optional accordion (populated by JS) -->
-                </div>
+                <!-- VIEW 2: Ko'plab kiritish (Bulk text paste mode) -->
+                <div id="cw-bulk-form-view" style="display: none;">
+                    <div class="cw-field-group cw-langs-row">
+                        <div class="cw-field">
+                            <label class="cw-label">Manba tili</label>
+                            <select id="bulk-source-lang" class="cw-select">
+                                <option value="en">🇬🇧 Ingliz</option>
+                                <option value="de">🇩🇪 Nemis</option>
+                                <option value="fr">🇫🇷 Fransuz</option>
+                                <option value="ru">🇷🇺 Rus</option>
+                                <option value="es">🇪🇸 Ispan</option>
+                                <option value="tr">🇹🇷 Turk</option>
+                                <option value="ar">🇸🇦 Arab</option>
+                                <option value="ko">🇰🇷 Koreys</option>
+                                <option value="zh">🇨🇳 Xitoy</option>
+                                <option value="it">🇮🇹 Italyan</option>
+                                <option value="ja">🇯🇵 Yapon</option>
+                                <option value="pt">🇧🇷 Portugiz</option>
+                                <option value="uz">🇺🇿 O'zbek</option>
+                            </select>
+                        </div>
+                        <div class="cw-lang-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </div>
+                        <div class="cw-field">
+                            <label class="cw-label">Tarjima tili</label>
+                            <select id="bulk-target-lang" class="cw-select">
+                                <option value="uz">🇺🇿 O'zbek</option>
+                                <option value="en">🇬🇧 Ingliz</option>
+                                <option value="ru">🇷🇺 Rus</option>
+                                <option value="de">🇩🇪 Nemis</option>
+                                <option value="fr">🇫🇷 Fransuz</option>
+                                <option value="es">🇪🇸 Ispan</option>
+                                <option value="tr">🇹🇷 Turk</option>
+                                <option value="ar">🇸🇦 Arab</option>
+                                <option value="ko">🇰🇷 Koreys</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <!-- Button to dynamically add another word row -->
-                <div style="margin-top: 6px; margin-bottom: 6px;">
-                    <button type="button" class="cw-add-row-btn" id="cw-add-row-btn" style="width: 100%;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        ➕ Yana so'z qo'shish
-                    </button>
-                </div>
+                    <div class="cw-field" style="margin-top: 8px;">
+                        <label class="cw-label">Matn holatida so'zlarni joylashtiring (Paste)</label>
+                        <p class="cw-help-text" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px;">
+                            Har bir qatorga bittadan so me'yorida formatda yozing:<br>
+                            <code>apple - olma</code> yoki <code>book - kitob</code>
+                        </p>
+                        <textarea id="bulk-words-input" class="cw-textarea" rows="6" placeholder="apple - olma&#10;book - kitob&#10;house - uy"></textarea>
+                    </div>
 
-                <!-- Collection name for this batch (optional) -->
-                <div class="cw-field" style="margin-top: 4px;">
-                    <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
-                    <input type="text" id="cw-collection" class="cw-input" placeholder="e.g. Ish so'zlari, A2 daraja..." autocomplete="off" list="cw-collection-datalist">
-                    <datalist id="cw-collection-datalist"></datalist>
+                    <div class="cw-field" style="margin-top: 8px;">
+                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
+                        <input type="text" id="bulk-collection" class="cw-input" placeholder="e.g. A1 So'zlar..." autocomplete="off" list="bulk-collection-datalist">
+                        <datalist id="bulk-collection-datalist"></datalist>
+                    </div>
+
+                    <div id="bulk-parse-preview" class="bulk-preview-badge" style="display:none; margin-top: 8px; font-size: 0.76rem; font-weight: 700; color: var(--primary);">
+                        <span id="bulk-parsed-count">0</span> ta so'z aniqlandi
+                    </div>
                 </div>
 
                 <input type="hidden" id="cw-edit-id" value="">

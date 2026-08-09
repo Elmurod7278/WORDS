@@ -5574,11 +5574,18 @@ function openCustomWordModal(editId) {
     if (addRowBtn) addRowBtn.style.display = "flex";
   }
 
-  // Ensure Bittalab kiritish tab is active by default
+  // Ensure Bittalab kiritish tab and view is active by default
+  const singleView = document.getElementById("cw-single-form-view");
+  const bulkView = document.getElementById("cw-bulk-form-view");
   const tabSingle = document.getElementById("cw-mode-tab-single");
   const tabBulk = document.getElementById("cw-mode-tab-bulk");
+  const bulkInput = document.getElementById("bulk-words-input");
+
+  if (singleView) singleView.style.display = "block";
+  if (bulkView) bulkView.style.display = "none";
   if (tabSingle) tabSingle.classList.add("active");
   if (tabBulk) tabBulk.classList.remove("active");
+  if (bulkInput) bulkInput.value = "";
 
   updateModalLangLabels();
   if (overlay) overlay.style.display = "flex";
@@ -5597,6 +5604,11 @@ function updateModalLangLabels() {
 }
 
 function saveCustomWordFromModal() {
+  const bulkView = document.getElementById("cw-bulk-form-view");
+  if (bulkView && bulkView.style.display !== "none") {
+    saveBulkWords();
+    return;
+  }
   const editId = document.getElementById("cw-edit-id")?.value || "";
   const srcLang = document.getElementById("cw-source-lang")?.value || "en";
   const tgtLang = document.getElementById("cw-target-lang")?.value || "uz";
@@ -5965,6 +5977,7 @@ function saveBulkWords() {
   const existing = loadCustomWords();
   const merged = [...existing, ...parsed];
   saveCustomWords(merged);
+  closeCustomWordModal();
   closeBulkModal();
   renderCustomWordsScreen(
     document.getElementById("custom-search-input")?.value || "",
@@ -6127,16 +6140,24 @@ function initCustomWords() {
   // ---- Word Modal: Mode Switcher Tabs (Bittalab vs Ko'plab) & Add Row ----
   const tabSingle = document.getElementById("cw-mode-tab-single");
   const tabBulk = document.getElementById("cw-mode-tab-bulk");
+  const singleView = document.getElementById("cw-single-form-view");
+  const bulkView = document.getElementById("cw-bulk-form-view");
+
   if (tabSingle) {
     tabSingle.addEventListener("click", () => {
       if (tabSingle) tabSingle.classList.add("active");
       if (tabBulk) tabBulk.classList.remove("active");
+      if (singleView) singleView.style.display = "block";
+      if (bulkView) bulkView.style.display = "none";
     });
   }
   if (tabBulk) {
     tabBulk.addEventListener("click", () => {
-      closeCustomWordModal();
-      openBulkModal();
+      if (tabBulk) tabBulk.classList.add("active");
+      if (tabSingle) tabSingle.classList.remove("active");
+      if (bulkView) bulkView.style.display = "block";
+      if (singleView) singleView.style.display = "none";
+      updateCollectionDatalist("bulk-collection-datalist");
     });
   }
 
