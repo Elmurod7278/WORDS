@@ -906,6 +906,13 @@
 
                 <!-- VIEW 1: Bittalab kiritish (Single / Dynamic rows) -->
                 <div id="cw-single-form-view">
+                    <!-- Collection name for this batch (optional) -->
+                    <div class="cw-field" style="margin-bottom: 8px;">
+                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
+                        <input type="text" id="cw-collection" class="cw-input" placeholder="e.g. Ish so'zlari, A2 daraja..." autocomplete="off" list="cw-collection-datalist">
+                        <datalist id="cw-collection-datalist"></datalist>
+                    </div>
+
                     <!-- Languages row -->
                     <div class="cw-field-group cw-langs-row">
                         <div class="cw-field">
@@ -961,17 +968,17 @@
                             <span>Yana so'z qo'shish</span>
                         </button>
                     </div>
-
-                    <!-- Collection name for this batch (optional) -->
-                    <div class="cw-field" style="margin-top: 4px;">
-                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
-                        <input type="text" id="cw-collection" class="cw-input" placeholder="e.g. Ish so'zlari, A2 daraja..." autocomplete="off" list="cw-collection-datalist">
-                        <datalist id="cw-collection-datalist"></datalist>
-                    </div>
                 </div>
 
                 <!-- VIEW 2: Ko'plab kiritish (Bulk text paste mode) -->
                 <div id="cw-bulk-form-view" style="display: none;">
+                    <!-- Collection name for bulk batch (optional) -->
+                    <div class="cw-field" style="margin-bottom: 8px;">
+                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
+                        <input type="text" id="bulk-collection" class="cw-input" placeholder="e.g. A1 So'zlar..." autocomplete="off" list="bulk-collection-datalist">
+                        <datalist id="bulk-collection-datalist"></datalist>
+                    </div>
+
                     <div class="cw-field-group cw-langs-row">
                         <div class="cw-field">
                             <label class="cw-label">Manba tili</label>
@@ -1017,12 +1024,6 @@
                             <code>apple - olma</code> yoki <code>book - kitob</code>
                         </p>
                         <textarea id="bulk-words-input" class="cw-textarea" rows="6" placeholder="apple - olma&#10;book - kitob&#10;house - uy"></textarea>
-                    </div>
-
-                    <div class="cw-field" style="margin-top: 8px;">
-                        <label class="cw-label">To'plam nomi <span class="cw-optional">(opsional)</span></label>
-                        <input type="text" id="bulk-collection" class="cw-input" placeholder="e.g. A1 So'zlar..." autocomplete="off" list="bulk-collection-datalist">
-                        <datalist id="bulk-collection-datalist"></datalist>
                     </div>
 
                     <div id="bulk-parse-preview" class="bulk-preview-badge" style="display:none; margin-top: 8px; font-size: 0.76rem; font-weight: 700; color: var(--primary);">

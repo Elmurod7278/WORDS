@@ -5672,11 +5672,11 @@ function openCustomWordModal(editId) {
 
     if (srcLangSel) srcLangSel.value = defaultSrc;
     if (tgtLangSel) tgtLangSel.value = defaultTgt;
-    if (collInput) collInput.value = defaultColl;
+    if (collInput) collInput.value = "";
 
     if (bulkSrcSel) bulkSrcSel.value = defaultSrc;
     if (bulkTgtSel) bulkTgtSel.value = defaultTgt;
-    if (bulkCollInput) bulkCollInput.value = defaultColl;
+    if (bulkCollInput) bulkCollInput.value = "";
 
     // 1 empty row
     addWordRowToModal("", "", "", "", "");
