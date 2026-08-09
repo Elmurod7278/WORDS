@@ -5594,16 +5594,7 @@ function saveCustomWordFromModal() {
   saveCustomWords(words);
   closeCustomWordModal();
   renderCustomWordsScreen(
-    document.getElementById("custom-search-input")?.value || "",
-    document.getElementById("custom-lang-filter")?.value || "all"
-  );
-
-  if (!editId && wordPairs.length > 1) {
-    showAppAlert("✅ Saqlandi", `${wordPairs.length} ta so'z muvaffaqiyatli qo'shildi!`);
-  }
-}
-
-// ---- Collection Batch Edit Modal ----
+    // ---- Collection Batch Edit Modal ----
 function openEditCollectionModal(collName) {
   const overlay = document.getElementById("collection-modal-overlay");
   const origNameInput = document.getElementById("coll-original-name");
@@ -5611,6 +5602,8 @@ function openEditCollectionModal(collName) {
   const titleEl = document.getElementById("coll-modal-title");
   const countSpan = document.getElementById("coll-words-count");
   const container = document.getElementById("coll-words-container");
+  const srcSel = document.getElementById("coll-source-lang");
+  const tgtSel = document.getElementById("coll-target-lang");
 
   if (!overlay || !container) return;
 
@@ -5621,6 +5614,9 @@ function openEditCollectionModal(collName) {
   if (editNameInput) editNameInput.value = collName;
   if (titleEl) titleEl.textContent = `'${collName}' to'plamini tahrirlash`;
   if (countSpan) countSpan.textContent = words.length;
+
+  if (srcSel && words[0]?.srcLang) srcSel.value = words[0].srcLang;
+  if (tgtSel && words[0]?.tgtLang) tgtSel.value = words[0].tgtLang;
 
   container.innerHTML = "";
   words.forEach(w => {
@@ -5642,15 +5638,13 @@ function addCollectionWordRow(container, wordObj = null) {
   const def = wordObj ? (wordObj.definition || "") : "";
   const ex = wordObj ? (wordObj.example || "") : "";
   const id = wordObj ? wordObj.id : generateCustomWordId();
-  const srcLang = wordObj ? wordObj.srcLang : "en";
-  const tgtLang = wordObj ? wordObj.tgtLang : "uz";
+  const srcLang = wordObj ? wordObj.srcLang : (document.getElementById("coll-source-lang")?.value || "en");
+  const tgtLang = wordObj ? wordObj.tgtLang : (document.getElementById("coll-target-lang")?.value || "uz");
   const hasOptionalData = !!(trans || def || ex);
 
   const card = document.createElement("div");
   card.className = "cw-word-row-card coll-word-item";
   card.dataset.wordId = id;
-  card.dataset.srcLang = srcLang;
-  card.dataset.tgtLang = tgtLang;
 
   card.innerHTML = `
     <div class="cw-word-row-main">
@@ -5664,7 +5658,7 @@ function addCollectionWordRow(container, wordObj = null) {
       </div>
       <div class="cw-word-row-actions">
         <button type="button" class="cw-row-opt-toggle-btn ${hasOptionalData ? 'active' : ''}" title="Qo'shimcha ma'lumotlar (Transkripsiya, Izoh, Misol...)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83 2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83 2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
         <button type="button" class="cw-row-remove-btn coll-row-del-btn" title="So'zni o'chirish" style="display: flex;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -5716,8 +5710,15 @@ function updateCollWordsCount() {
 async function saveCollectionEditModal() {
   const origName = document.getElementById("coll-original-name")?.value || "";
   const newName = (document.getElementById("coll-edit-name")?.value || "").trim();
+  const srcLang = document.getElementById("coll-source-lang")?.value || "en";
+  const tgtLang = document.getElementById("coll-target-lang")?.value || "uz";
   const container = document.getElementById("coll-words-container");
   if (!container) return;
+
+  if (srcLang === tgtLang) {
+    showAppAlert("Bir xil tillar", "Manba tili va tarjima tili bir xil bo'lmasligi kerak!");
+    return;
+  }
 
   if (!newName) {
     showAppAlert("To'plam nomi bo'sh", "Iltimos, to'plam nomini kiriting!");
@@ -5730,8 +5731,6 @@ async function saveCollectionEditModal() {
 
   items.forEach(card => {
     const wordId = card.dataset.wordId;
-    const srcLang = card.dataset.srcLang || "en";
-    const tgtLang = card.dataset.tgtLang || "uz";
     const src = (card.querySelector(".coll-src-input")?.value || "").trim();
     const tgt = (card.querySelector(".coll-tgt-input")?.value || "").trim();
     const trans = (card.querySelector(".coll-trans-input")?.value || "").trim();
