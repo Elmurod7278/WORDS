@@ -4981,8 +4981,15 @@ function syncCustomWordsToDictionary() {
     return;
   }
 
+  // Sort words newest first (by createdAt / created_at or timestamp in ID)
+  const sortedWords = [...words].sort((a, b) => {
+    const timeA = a.createdAt || (a.created_at ? new Date(a.created_at).getTime() : 0) || (a.id && parseInt(a.id.split('_')[1])) || 0;
+    const timeB = b.createdAt || (b.created_at ? new Date(b.created_at).getTime() : 0) || (b.id && parseInt(b.id.split('_')[1])) || 0;
+    return timeB - timeA;
+  });
+
   // Group words by collection or create standalone Language Pair Books
-  words.forEach(w => {
+  sortedWords.forEach(w => {
     const src = w.srcLang || "en";
     const tgt = w.tgtLang || "uz";
     const srcMeta = LANG_META[src] || { flag: "🌐", name: src };
@@ -5005,8 +5012,8 @@ function syncCustomWordsToDictionary() {
     const langBookName = `${srcMeta.flag} ${srcMeta.name} - ${tgtMeta.flag} ${tgtMeta.name}`;
     if (!dictionaryData[langBookName]) dictionaryData[langBookName] = {};
 
-    // Unit key inside the language book: Collection name or default "Asosiy lug'at"
-    const unitKey = w.collection ? `📁 ${w.collection}` : `Asosiy lug'at`;
+    // Unit key inside the language book: Collection name or default "📁 Aralash"
+    const unitKey = w.collection ? `📁 ${w.collection}` : `📁 Aralash`;
     if (!dictionaryData[langBookName][unitKey]) dictionaryData[langBookName][unitKey] = [];
     dictionaryData[langBookName][unitKey].push(item);
   });
@@ -5025,15 +5032,22 @@ function renderCustomWordsScreen(filterText, filterLang) {
   const langsEl = document.getElementById("cstat-langs");
   const collEl = document.getElementById("cstat-collections");
 
+  // Sort words newest first
+  const sortedWords = [...words].sort((a, b) => {
+    const timeA = a.createdAt || (a.created_at ? new Date(a.created_at).getTime() : 0) || (a.id && parseInt(a.id.split('_')[1])) || 0;
+    const timeB = b.createdAt || (b.created_at ? new Date(b.created_at).getTime() : 0) || (b.id && parseInt(b.id.split('_')[1])) || 0;
+    return timeB - timeA;
+  });
+
   // Update stats
-  const langPairs = new Set(words.map(w => `${w.srcLang}→${w.tgtLang}`));
-  const collections = new Set(words.filter(w => w.collection).map(w => w.collection));
-  if (totalEl) totalEl.textContent = words.length;
+  const langPairs = new Set(sortedWords.map(w => `${w.srcLang}→${w.tgtLang}`));
+  const collections = new Set(sortedWords.filter(w => w.collection).map(w => w.collection));
+  if (totalEl) totalEl.textContent = sortedWords.length;
   if (langsEl) langsEl.textContent = langPairs.size;
   if (collEl) collEl.textContent = collections.size;
 
   // Apply filters
-  let filtered = words;
+  let filtered = sortedWords;
   const q = (filterText || "").trim().toLowerCase();
   if (q) {
     filtered = filtered.filter(w =>
