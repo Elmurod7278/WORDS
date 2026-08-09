@@ -2,1730 +2,559 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Essential — Admin Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel — Words</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ============================================================
-       DESIGN SYSTEM
-       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0b0d14;
-      --bg-elevated: #111420;
-      --surface: #171b28;
-      --surface-hover: #1e2336;
-      --border: #252a3a;
-      --border-light: #2f3548;
-      --text: #f0f1f7;
-      --text-secondary: #9ba1b7;
-      --text-muted: #6b7294;
-      --accent: #7c6aff;
-      --accent-glow: rgba(124, 106, 255, 0.25);
-      --accent-soft: #252047;
-      --accent-gradient: linear-gradient(135deg, #7c6aff 0%, #a78bfa 50%, #c084fc 100%);
-      --green: #34d399;
-      --green-soft: rgba(52, 211, 153, 0.12);
-      --orange: #fb923c;
-      --orange-soft: rgba(251, 146, 60, 0.12);
-      --red: #f87171;
-      --red-soft: rgba(248, 113, 113, 0.12);
-      --blue: #60a5fa;
-      --blue-soft: rgba(96, 165, 250, 0.12);
-      --cyan: #22d3ee;
-      --bar-track: #1e2233;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
-      --shadow-glow: 0 0 24px rgba(124,106,255,0.15);
-      --radius-sm: 10px;
-      --radius-md: 14px;
-      --radius-lg: 18px;
-      --radius-xl: 22px;
-      --glass: rgba(23, 27, 40, 0.75);
-      --glass-border: rgba(255,255,255,0.06);
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222635;
+      --border: #2d3148; --text: #e8eaf6; --text2: #9095b0; --text3: #5a6080;
+      --accent: #6c63ff; --accent2: #a78bfa;
+      --green: #22c55e; --orange: #f59e0b; --red: #ef4444; --blue: #3b82f6; --cyan: #06b6d4;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ============================================================
-       HEADER
-       ============================================================ */
-    .header {
-      display: none;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(11, 13, 20, 0.85);
-      backdrop-filter: blur(20px) saturate(1.5);
-      -webkit-backdrop-filter: blur(20px) saturate(1.5);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 14px 16px;
-    }
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .header h1 {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .updated-text {
-      font-size: 11px;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-    .btn-refresh {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text-secondary);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.2s;
-    }
-    .btn-refresh:active { transform: scale(0.92); }
-    .btn-refresh.spinning { animation: spin 0.6s ease; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em; }
+    .sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--text2); cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: all 0.15s; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent2); font-weight: 600; }
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--border); }
+    .sidebar-footer .refresh-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; width: 100%; justify-content: center; font-family: inherit; transition: all 0.15s; }
+    .sidebar-footer .refresh-btn:hover { color: var(--text); border-color: var(--accent); }
+    .sidebar-footer .refresh-btn.spinning .refresh-icon { animation: spin 0.6s linear; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ============================================================
-       FILTER BAR
-       ============================================================ */
-    .filter-bar {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      padding-bottom: 2px;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-
-    .chip {
-      flex-shrink: 0;
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 12.5px;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      white-space: nowrap;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .chip:active { transform: scale(0.95); }
-    .chip.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: 0 0 16px var(--accent-glow);
-    }
-
-    /* ============================================================
-       MAIN CONTENT
-       ============================================================ */
-    .main {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 16px 16px 80px;
-    }
-
-    /* ============================================================
-       USERS PANEL CONTROLS
-       ============================================================ */
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .controls input {
-      flex: 1;
-      padding: 11px 14px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 500;
-      border-radius: var(--radius-md);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .controls input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .controls input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    .controls select {
-      padding: 11px 14px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 500;
-      border-radius: var(--radius-md);
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      min-width: 100px;
-    }
-
-    .controls select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    /* ============================================================
-       PAGINATION
-       ============================================================ */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 16px;
-      padding: 12px 0;
-    }
-
-    .pagination button {
-      padding: 10px 16px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: all 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .pagination button:hover {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
-
-    .pagination button:active {
-      transform: scale(0.95);
-    }
-
-    .pagination span {
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      min-width: 80px;
-      text-align: center;
-    }
-
-    /* ============================================================
-       SEARCH BAR
-       ============================================================ */
-    .search-wrapper {
-      position: relative;
-      margin-bottom: 16px;
-    }
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 14px;
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-    .search-input {
-      width: 100%;
-      padding: 11px 14px 11px 38px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13.5px;
-      font-weight: 500;
-      border-radius: var(--radius-md);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .search-input::placeholder { color: var(--text-muted); }
-    .search-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-
-    /* ============================================================
-       STAT CARDS
-       ============================================================ */
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px 12px;
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--accent-gradient);
-      opacity: 0.6;
-    }
-    .stat-card .label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      display: block;
-      margin-bottom: 8px;
-      line-height: 1.3;
-    }
-    .stat-card .value {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* ============================================================
-       SECTIONS (Glass cards)
-       ============================================================ */
-    .section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 18px 16px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow-sm);
-      animation: fadeSlideUp 0.4s ease both;
-    }
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .section:nth-child(2) { animation-delay: 0.05s; }
-    .section:nth-child(3) { animation-delay: 0.1s; }
-    .section:nth-child(4) { animation-delay: 0.15s; }
-    .section:nth-child(5) { animation-delay: 0.2s; }
-    .section:nth-child(6) { animation-delay: 0.25s; }
-
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .section-title {
-      font-size: 14px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title .icon { font-size: 16px; }
-    .section-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 12px;
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-
-    /* ============================================================
-       CHART (SVG bar chart)
-       ============================================================ */
-    .chart-container {
-      position: relative;
-      width: 100%;
-      height: 140px;
-      margin-bottom: 4px;
-    }
-    .chart-svg {
-      width: 100%;
-      height: 100%;
-    }
-    .chart-bar {
-      fill: var(--accent);
-      opacity: 0.7;
-      rx: 3;
-      transition: opacity 0.2s;
-    }
-    .chart-bar:hover { opacity: 1; }
-    .chart-bar-users {
-      fill: var(--cyan);
-      opacity: 0.5;
-      rx: 3;
-      transition: opacity 0.2s;
-    }
-    .chart-bar-users:hover { opacity: 0.9; }
-    .chart-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 500;
-      padding: 0 2px;
-    }
-    .chart-legend {
-      display: flex;
-      gap: 16px;
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-top: 8px;
-    }
-    .chart-legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .chart-legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    /* ============================================================
-       RANK ROWS (progress bars)
-       ============================================================ */
-    .row-list { display: flex; flex-direction: column; gap: 12px; }
-
-    .rank-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .rank-row .top-line {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .rank-row .name {
-      font-size: 13px;
-      font-weight: 600;
-      overflow-wrap: anywhere;
-    }
-    .rank-row .count {
-      color: var(--text-secondary);
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      font-size: 13px;
-    }
-    .bar-track {
-      height: 6px;
-      border-radius: 4px;
-      background: var(--bar-track);
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      background: var(--accent-gradient);
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      width: 0;
-    }
-
-    /* ============================================================
-       EXERCISE DETAIL CARDS
-       ============================================================ */
-    .exercise-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .exercise-card {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      transition: all 0.2s;
-    }
-    .exercise-card:active { transform: scale(0.98); }
-    .exercise-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    .exercise-name {
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .exercise-usage {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-    .exercise-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .exercise-stat {
-      text-align: center;
-    }
-    .exercise-stat-value {
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .exercise-stat-value.green { color: var(--green); }
-    .exercise-stat-value.orange { color: var(--orange); }
-    .exercise-stat-value.blue { color: var(--blue); }
-    .exercise-stat-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    /* ============================================================
-       SCORE PILL
-       ============================================================ */
-    .score-pill {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 6px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(124,106,255,0.2);
-      border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      font-weight: 800;
-      font-size: 20px;
-      color: var(--accent);
-    }
-    .score-pill .of {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-
-    /* ============================================================
-       USER CARDS
-       ============================================================ */
+    .content { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { position: sticky; top: 0; z-index: 40; background: rgba(15,17,23,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .period-chips { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 3px; }
+    .chip { padding: 5px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; border: none; background: none; color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
+    .chip:hover { color: var(--text); }
+    .chip.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .updated-badge { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); white-space: nowrap; }
+    .page { padding: 28px; display: none; }
+    .page.active { display: block; }
+    .loading-bar { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 999; overflow: hidden; }
+    .loading-bar.active::after { content: ''; display: block; height: 100%; width: 35%; background: linear-gradient(90deg, var(--accent), var(--accent2)); animation: loadSlide 0.9s ease-in-out infinite; }
+    @keyframes loadSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(380%); } }
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: border-color 0.2s; }
+    .stat-card:hover { border-color: rgba(108,99,255,0.4); }
+    .stat-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px; }
+    .stat-icon.purple { background: rgba(108,99,255,0.15); }
+    .stat-icon.green { background: rgba(34,197,94,0.12); }
+    .stat-icon.orange { background: rgba(245,158,11,0.12); }
+    .stat-icon.blue { background: rgba(59,130,246,0.12); }
+    .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-value { font-size: 30px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .card + .card { margin-top: 18px; }
+    .card-title { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .rank-list { display: flex; flex-direction: column; gap: 13px; }
+    .rank-row { display: flex; flex-direction: column; gap: 6px; }
+    .rank-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .rank-name { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank-count { font-size: 13px; font-weight: 700; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
+    .bar-track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; width: 0; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+    .chart-wrap { position: relative; height: 160px; margin-bottom: 8px; }
+    .chart-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); margin-top: 6px; }
+    .chart-legend { display: flex; gap: 16px; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text2); }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .exercise-list { display: flex; flex-direction: column; gap: 10px; }
+    .exercise-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+    .ex-badge { width: 36px; height: 36px; border-radius: 8px; background: rgba(108,99,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .ex-info { flex: 1; min-width: 0; }
+    .ex-name { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .ex-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .ex-stats { display: flex; gap: 16px; flex-shrink: 0; }
+    .ex-stat { text-align: right; }
+    .ex-stat-val { font-size: 14px; font-weight: 700; }
+    .ex-stat-val.green { color: var(--green); }
+    .ex-stat-val.blue { color: var(--blue); }
+    .ex-stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.03em; }
+    .users-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .search-box { flex: 1; position: relative; }
+    .search-box input { width: 100%; padding: 10px 14px 10px 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13.5px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+    .search-box input::placeholder { color: var(--text3); }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 13px; pointer-events: none; }
+    .toolbar-select { padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-size: 13px; font-family: inherit; cursor: pointer; outline: none; }
+    .sort-tabs { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; gap: 2px; margin-bottom: 14px; }
+    .sort-tab { flex: 1; padding: 7px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600; border: none; background: none; color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: inherit; text-align: center; }
+    .sort-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
     .user-list { display: flex; flex-direction: column; gap: 10px; }
-
-    .user-card {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      transition: all 0.25s;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .user-card:active { transform: scale(0.985); }
-    .user-card.expanded {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-glow), var(--shadow-md);
-    }
-
-    .user-card-header {
-      padding: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .user-identity { flex: 1; min-width: 0; }
-    .user-name {
-      font-size: 14px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .user-phone {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 1px;
-    }
-    .user-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .user-status {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
+    .user-card:hover { border-color: rgba(108,99,255,0.4); }
+    .user-card.expanded { border-color: var(--accent); }
+    .user-head { display: flex; align-items: center; padding: 14px 16px; gap: 14px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0; user-select: none; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .user-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+    .status-badge { display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.online { background: var(--green); box-shadow: 0 0 5px var(--green); }
     .status-dot.recent { background: var(--orange); }
-    .status-dot.offline { background: var(--text-muted); }
-    .user-expand-arrow {
-      font-size: 10px;
-      color: var(--text-muted);
-      transition: transform 0.3s;
-    }
-    .user-card.expanded .user-expand-arrow {
-      transform: rotate(180deg);
-    }
-
-    .user-detail {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .user-card.expanded .user-detail {
-      max-height: 300px;
-    }
-    .user-detail-inner {
-      padding: 0 14px 14px;
-      border-top: 1px solid var(--border);
-    }
-    .user-meta-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      padding-top: 12px;
-    }
-    .meta-item {
-      background: var(--surface);
-      border-radius: var(--radius-sm);
-      padding: 10px 8px;
-      text-align: center;
-    }
-    .meta-label {
-      display: block;
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 4px;
-    }
-    .meta-value {
-      font-size: 14px;
-      font-weight: 800;
-      overflow-wrap: anywhere;
-      letter-spacing: -0.01em;
-    }
-
-    /* ============================================================
-       EMPTY STATE / SKELETON / ERROR
-       ============================================================ */
-    .empty-state {
-      font-size: 13px;
-      color: var(--text-muted);
-      text-align: center;
-      padding: 20px 8px;
-    }
-    .skeleton {
-      color: var(--text-muted);
-      font-size: 13px;
-      text-align: center;
-      padding: 16px;
-    }
-    .skeleton::after {
-      content: '';
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: skeletonSpin 0.6s linear infinite;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-    @keyframes skeletonSpin { to { transform: rotate(360deg); } }
-
-    .error-banner {
-      background: var(--red-soft);
-      border: 1px solid rgba(248,113,113,0.2);
-      color: var(--red);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      font-size: 13px;
-      margin-bottom: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* ============================================================
-       TAB NAVIGATION & PANELS
-       ============================================================ */
-    .tab-nav {
-      display: flex;
-      gap: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 16px;
-      margin-bottom: 16px;
-      position: sticky;
-      top: 60px;
-      z-index: 50;
-    }
-
-    .tab-button {
-      flex: 1;
-      padding: 14px 16px;
-      border: none;
-      background: none;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      border-bottom: 3px solid transparent;
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .tab-button:hover {
-      color: var(--text);
-    }
-
-    .tab-button.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* ============================================================
-       TAB BAR (bottom, for sorting users)
-       ============================================================ */
-    .sort-tabs {
-      display: flex;
-      gap: 4px;
-      background: var(--bg-elevated);
-      border-radius: var(--radius-sm);
-      padding: 3px;
-      margin-bottom: 12px;
-    }
-    .sort-tab {
-      flex: 1;
-      padding: 7px 6px;
-      border-radius: 8px;
-      font-size: 11.5px;
-      font-weight: 600;
-      text-align: center;
-      color: var(--text-muted);
-      border: none;
-      background: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .sort-tab.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* ============================================================
-       ANIMATIONS
-       ============================================================ */
-    @keyframes countUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-in {
-      animation: countUp 0.4s ease both;
-    }
-
-    /* Smooth loading overlay */
-    .loading-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      z-index: 200;
-      background: transparent;
-      overflow: hidden;
-    }
-    .loading-overlay.active::after {
-      content: '';
-      display: block;
-      height: 100%;
-      width: 40%;
-      background: var(--accent-gradient);
-      border-radius: 2px;
-      animation: loadingSlide 1s ease infinite;
-    }
-    @keyframes loadingSlide {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(350%); }
-    }
-
-    /* ============================================================
-       NEW: Tab Navigation & User Controls CSS
-       ============================================================ */
-    /* Tab Navigation */
-    .tab-nav {
-      display: flex;
-      gap: 10px;
-      padding: 15px;
-      border-bottom: 1px solid var(--card-border);
-      background: var(--bg-main);
-    }
-
-    .tab-button {
-      padding: 10px 16px;
-      background: transparent;
-      color: var(--text-main);
-      border: 1px solid var(--text-muted);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .tab-button:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .tab-button.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    /* Tab Panels */
-    .tab-panel {
-      display: none;
-      padding: 20px;
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    /* User Management Controls */
-    .controls {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    #search-input {
-      flex: 1;
-      padding: 10px 12px;
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      font-size: 13px;
-    }
-
-    #search-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    #limit-select {
-      padding: 10px 12px;
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    /* Users List */
-    .users-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .user-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      padding: 12px;
-      cursor: pointer;
-    }
-
-    .user-card summary {
-      font-weight: 600;
-      color: var(--text-main);
-      padding: 8px;
-      user-select: none;
-    }
-
-    .user-card summary:hover {
-      color: var(--primary);
-    }
-
-    .user-card[open] summary {
-      border-bottom: 1px solid var(--card-border);
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-    }
-
-    /* Timeline Display */
-    .timeline {
-      margin-top: 8px;
-      padding: 12px 8px;
-      font-size: 13px;
-    }
-
-    .day {
-      margin-bottom: 12px;
-    }
-
-    .day strong {
-      color: var(--primary);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .day ul {
-      list-style: none;
-      margin: 0;
-      padding-left: 16px;
-    }
-
-    .day li {
-      color: var(--text-muted);
-      padding: 2px 0;
-    }
-
-    /* Pagination Controls */
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-      padding: 15px 0;
-      border-top: 1px solid var(--card-border);
-    }
-
-    .pagination button {
-      padding: 8px 12px;
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s ease;
-    }
-
-    .pagination button:hover:not(:disabled) {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .pagination button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    #page-info {
-      color: var(--text-muted);
-      font-size: 13px;
-      min-width: 100px;
-      text-align: center;
+    .status-dot.offline { background: var(--text3); }
+    .chevron { font-size: 10px; color: var(--text3); transition: transform 0.25s; }
+    .user-card.expanded .chevron { transform: rotate(180deg); }
+    .user-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .user-card.expanded .user-body { max-height: 400px; }
+    .user-body-inner { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+    .user-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 14px; }
+    .meta-box { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
+    .meta-lbl { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 4px; }
+    .meta-val { font-size: 15px; font-weight: 700; color: var(--text); }
+    .user-last { margin-top: 10px; font-size: 12px; color: var(--text3); }
+    .user-last span { color: var(--text2); font-weight: 500; }
+    .user-timeline { margin-top: 12px; }
+    .tl-day { margin-bottom: 10px; }
+    .tl-date { font-size: 11.5px; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+    .tl-item { font-size: 12px; color: var(--text2); padding: 2px 0 2px 12px; border-left: 2px solid var(--border); }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; }
+    .page-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { font-size: 13px; color: var(--text2); min-width: 90px; text-align: center; }
+    .empty { text-align: center; color: var(--text3); font-size: 13px; padding: 20px; }
+    .skel { text-align: center; color: var(--text3); font-size: 13px; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .skel::after { content: ''; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    .err { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 500; margin-bottom: 14px; }
+    .fade-in { animation: fadeIn 0.35s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) {
+      .sidebar { width: 56px; }
+      .nav-item span:not(.nav-icon), .sidebar-logo p, .sidebar-logo h1, .sidebar-footer .refresh-btn span { display: none; }
+      .sidebar-logo { padding: 18px 10px; }
+      .content { margin-left: 56px; }
+      .stat-row, .grid-2 { grid-template-columns: repeat(2, 1fr); }
+      .ex-stats { display: none; }
+      .page { padding: 18px; }
+      .topbar { padding: 12px 18px; }
     }
   </style>
 </head>
 <body>
-  <!-- Tab Navigation -->
-  <nav class="tab-nav">
-    <button class="tab-button active" data-tab="overview">📊 Umumiy</button>
-    <button class="tab-button" data-tab="users">👤 Foydalanuvchilar</button>
-    <button class="tab-button" data-tab="content">📚 Kontent va Tahlil</button>
-  </nav>
-
-  <div class="loading-overlay" id="loading-bar"></div>
-
-  <div class="header">
-    <div class="header-top">
-      <h1>📊 Essential Analytics</h1>
-      <div class="header-actions">
-        <span class="updated-text" id="updated-at"></span>
-        <button class="btn-refresh" id="refresh-btn" type="button" aria-label="Yangilash">↻</button>
+  <div class="loading-bar" id="load-bar"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>📊 Admin</h1>
+        <p>Words Dashboard</p>
       </div>
-    </div>
-    <div class="filter-bar" id="period-filter">
-      <button class="chip active" data-period="all">Barchasi</button>
-      <button class="chip" data-period="today">Bugun</button>
-      <button class="chip" data-period="week">Hafta</button>
-      <button class="chip" data-period="month">Oy</button>
+      <nav class="nav">
+        <button class="nav-item active" data-page="overview"><span class="nav-icon">🏠</span><span>Umumiy</span></button>
+        <button class="nav-item" data-page="users"><span class="nav-icon">👤</span><span>Foydalanuvchilar</span></button>
+        <button class="nav-item" data-page="content"><span class="nav-icon">📈</span><span>Tahlil</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="refresh-btn" id="refresh-btn">
+          <span class="refresh-icon">↻</span><span>Yangilash</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="content">
+      <header class="topbar">
+        <div class="topbar-title" id="page-title">Umumiy ko'rinish</div>
+        <div class="topbar-right">
+          <div class="period-chips" id="period-filter">
+            <button class="chip active" data-period="all">Barchasi</button>
+            <button class="chip" data-period="today">Bugun</button>
+            <button class="chip" data-period="week">Hafta</button>
+            <button class="chip" data-period="month">Oy</button>
+          </div>
+          <div class="updated-badge" id="updated-at">—</div>
+        </div>
+      </header>
+
+      <div id="err-slot" style="padding:0 28px;"></div>
+
+      <!-- OVERVIEW -->
+      <div class="page active" id="page-overview">
+        <div class="stat-row">
+          <div class="stat-card fade-in">
+            <div class="stat-icon purple">👥</div>
+            <div class="stat-label">Jami foydalanuvchi</div>
+            <div class="stat-value" id="s-total">—</div>
+          </div>
+          <div class="stat-card fade-in" style="animation-delay:.05s">
+            <div class="stat-icon green">⚡</div>
+            <div class="stat-label">Bugun faol</div>
+            <div class="stat-value" id="s-daily">—</div>
+          </div>
+          <div class="stat-card fade-in" style="animation-delay:.1s">
+            <div class="stat-icon orange">📅</div>
+            <div class="stat-label">Hafta faol</div>
+            <div class="stat-value" id="s-weekly">—</div>
+          </div>
+          <div class="stat-card fade-in" style="animation-delay:.15s">
+            <div class="stat-icon blue">🎯</div>
+            <div class="stat-label">O'rtacha test bali</div>
+            <div class="stat-value" id="s-score">—</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card fade-in" style="animation-delay:.2s">
+            <div class="card-title">🔥 Eng mashhur mashqlar</div>
+            <div class="rank-list" id="top-modes"><div class="skel">Yuklanmoqda</div></div>
+          </div>
+          <div class="card fade-in" style="animation-delay:.25s">
+            <div class="card-title">📚 Eng mashhur kitoblar</div>
+            <div class="rank-list" id="top-books"><div class="skel">Yuklanmoqda</div></div>
+          </div>
+        </div>
+        <div class="card fade-in" style="animation-delay:.3s">
+          <div class="card-title">🖥️ Ko'p ochilgan sahifalar</div>
+          <div class="rank-list" id="top-screens"><div class="skel">Yuklanmoqda</div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page" id="page-users">
+        <div class="users-toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Ism, username yoki telefon...">
+          </div>
+          <select class="toolbar-select" id="limit-select">
+            <option value="10">10 ta</option>
+            <option value="20">20 ta</option>
+            <option value="50">50 ta</option>
+          </select>
+        </div>
+        <div class="sort-tabs" id="sort-tabs">
+          <button class="sort-tab active" data-sort="last_active">So'nggi faollik</button>
+          <button class="sort-tab" data-sort="name">Ismi bo'yicha</button>
+          <button class="sort-tab" data-sort="quizzes">Test soni</button>
+        </div>
+        <div class="user-list" id="user-list"><div class="skel">Yuklanmoqda</div></div>
+        <div class="pagination">
+          <button class="page-btn" id="btn-prev">← Oldingi</button>
+          <span class="page-info" id="page-info">Sahifa 1</span>
+          <button class="page-btn" id="btn-next">Keyingi →</button>
+        </div>
+      </div>
+
+      <!-- CONTENT / ANALYSIS -->
+      <div class="page" id="page-content">
+        <div class="card fade-in" style="margin-bottom:18px">
+          <div class="card-title">📈 Faollik grafigi</div>
+          <div class="chart-wrap" id="chart-wrap"><div class="skel">Yuklanmoqda</div></div>
+          <div class="chart-labels" id="chart-labels"></div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Hodisalar</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div> Foydalanuvchilar</div>
+          </div>
+        </div>
+        <div class="card fade-in" style="animation-delay:.1s">
+          <div class="card-title">🎮 Mashq turlari <span id="ex-count" style="background:rgba(108,99,255,.15);color:var(--accent2);font-size:11px;padding:2px 8px;border-radius:12px;font-weight:700;margin-left:4px;">0</span></div>
+          <div class="exercise-list" id="exercise-list"><div class="skel">Yuklanmoqda</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <main class="main">
-    <div id="error-slot"></div>
-
-    <!-- Overview Tab Panel -->
-    <div class="tab-panel active" id="overview">
-      <!-- Stat Cards -->
-      <div class="stat-grid" id="stat-grid">
-      <div class="stat-card">
-        <span class="label">Jami</span>
-        <span class="value" id="total-users">–</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Bugun faol</span>
-        <span class="value" id="daily-active">–</span>
-      </div>
-      <div class="stat-card">
-        <span class="label">Hafta faol</span>
-        <span class="value" id="weekly-active">–</span>
-      </div>
-    </div>
-
-      <!-- Top Modes -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">🔥</span> Eng mashhur mashqlar</div>
-        </div>
-        <div class="row-list" id="top-modes"><div class="skeleton">Yuklanmoqda</div></div>
-      </div>
-
-      <!-- Top Books -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">📖</span> Eng mashhur kitoblar</div>
-        </div>
-        <div class="row-list" id="top-books"><div class="skeleton">Yuklanmoqda</div></div>
-      </div>
-
-      <!-- Top Screens -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">🧭</span> Eng ko'p ochilgan sahifalar</div>
-        </div>
-        <div class="row-list" id="top-screens"><div class="skeleton">Yuklanmoqda</div></div>
-      </div>
-
-      <!-- Average Score -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">🎯</span> O'rtacha test natijasi</div>
-        </div>
-        <div id="avg-score"><div class="skeleton">Yuklanmoqda</div></div>
-      </div>
-    </div>
-
-    <!-- Users Tab Panel -->
-    <div class="tab-panel" id="users">
-      <div class="controls">
-        <input type="text" id="search-input" placeholder="Qidiruv: ism/username/telefon...">
-        <select id="limit-select">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-      </div>
-
-      <div class="sort-tabs" id="sort-tabs">
-        <button class="sort-tab active" data-sort="last_active">So'nggi</button>
-        <button class="sort-tab" data-sort="name">Ism</button>
-        <button class="sort-tab" data-sort="quizzes">Testlar</button>
-      </div>
-
-      <div id="users-list" class="users-list">
-        <div class="skeleton">Yuklanmoqda...</div>
-      </div>
-
-      <div class="pagination">
-        <button id="btn-prev">◄ Oldingi</button>
-        <span id="page-info">Sahifa 1</span>
-        <button id="btn-next">Keyingi ►</button>
-      </div>
-    </div>
-
-    <!-- Content Tab Panel -->
-    <div class="tab-panel" id="content">
-      <!-- Activity Timeline -->
-      <div class="section" id="timeline-section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">📈</span> Faollik grafigi</div>
-        </div>
-        <div class="chart-container" id="chart-container">
-          <div class="skeleton">Yuklanmoqda</div>
-        </div>
-        <div class="chart-labels" id="chart-labels"></div>
-        <div class="chart-legend">
-          <div class="chart-legend-item">
-            <div class="chart-legend-dot" style="background: var(--accent);"></div>
-            Hodisalar
-          </div>
-          <div class="chart-legend-item">
-            <div class="chart-legend-dot" style="background: var(--cyan);"></div>
-            Foydalanuvchilar
-          </div>
-        </div>
-      </div>
-
-      <!-- Exercise Details -->
-      <div class="section" id="exercise-section">
-        <div class="section-header">
-          <div class="section-title"><span class="icon">🎮</span> Mashq turlari</div>
-          <span class="section-badge" id="exercise-count">0</span>
-        </div>
-        <div class="exercise-grid" id="exercise-grid">
-          <div class="skeleton">Yuklanmoqda</div>
-        </div>
-      </div>
-    </div>
-  </main>
-
   <script>
-    /* ==========================================================
-       STATE
-       ========================================================== */
-    const state = {
-      period: 'all',
-      sort: 'last_active',
-      search: '',
-      searchTimeout: null,
-      limit: 10,
-      offset: 0,
+    const state = { page:'overview', period:'all', sort:'last_active', search:'', limit:10, offset:0, stimer:null };
+    const TITLES = { overview:"Umumiy ko'rinish", users:"Foydalanuvchilar", content:"Faollik tahlili" };
+    const $ = id => document.getElementById(id);
+
+    function loading(on) { $('load-bar').classList.toggle('active', on); }
+    function showErr(msg) {
+      const d = document.createElement('div'); d.className = 'err'; d.textContent = '⚠️ '+msg;
+      $('err-slot').innerHTML = ''; $('err-slot').appendChild(d);
+      setTimeout(() => d.remove(), 6000);
+    }
+
+    function timeAgo(iso) {
+      if (!iso) return '—';
+      const m = Math.floor((Date.now() - new Date(iso)) / 60000);
+      if (m < 1) return 'Hozir';
+      if (m < 60) return m+' daq oldin';
+      const h = Math.floor(m/60);
+      if (h < 24) return h+' soat oldin';
+      return Math.floor(h/24)+' kun oldin';
+    }
+
+    function statusInfo(iso) {
+      if (!iso) return { cls:'offline', text:'—', color:'var(--text3)' };
+      const m = Math.floor((Date.now() - new Date(iso)) / 60000);
+      if (m < 5)  return { cls:'online',  text:'Online',       color:'var(--green)'  };
+      if (m < 60) return { cls:'recent',  text:timeAgo(iso),   color:'var(--orange)' };
+      return               { cls:'offline', text:timeAgo(iso),  color:'var(--text3)'  };
+    }
+
+    function fmtMin(min) {
+      if (!min) return '0 daq';
+      if (min < 60) return min+' daq';
+      return Math.floor(min/60)+'s '+(min%60)+'d';
+    }
+
+    function animNum(el, end) {
+      const dur = 600, t0 = performance.now();
+      const tick = now => {
+        const p = Math.min((now-t0)/dur,1), e = 1-Math.pow(1-p,3);
+        el.textContent = Math.round(end*e);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    }
+
+    function qs(params) {
+      const p = {};
+      for (const [k,v] of Object.entries(params)) if (v!==undefined && v!=='' && v!=='all') p[k]=v;
+      const s = new URLSearchParams(p).toString();
+      return s ? '?'+s : '';
+    }
+
+    function switchPage(name) {
+      state.page = name;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      $('page-'+name).classList.add('active');
+      document.querySelector('.nav-item[data-page="'+name+'"]').classList.add('active');
+      $('page-title').textContent = TITLES[name] || name;
+    }
+
+    function renderRanks(container, rows, nameKey, cntKey, emptyText, color) {
+      container.innerHTML = '';
+      if (!rows || !rows.length) { container.innerHTML = '<div class="empty">'+emptyText+'</div>'; return; }
+      const max = Math.max(...rows.map(r => r[cntKey]));
+      rows.forEach((row, i) => {
+        const pct = max ? Math.max(4, (row[cntKey]/max)*100) : 4;
+        const d = document.createElement('div'); d.className = 'rank-row';
+        d.innerHTML = '<div class="rank-top"><span class="rank-name">'+row[nameKey]+'</span><span class="rank-count">'+Number(row[cntKey]).toLocaleString()+'</span></div><div class="bar-track"><div class="bar-fill" style="background:'+color+'"></div></div>';
+        container.appendChild(d);
+        requestAnimationFrame(() => d.querySelector('.bar-fill').style.width = pct+'%');
+      });
+    }
+
+    function renderChart(data) {
+      const wrap = $('chart-wrap'), lbls = $('chart-labels');
+      wrap.innerHTML = ''; lbls.innerHTML = '';
+      if (!data || !data.length) { wrap.innerHTML = '<div class="empty">Ma\'lumot yo\'q</div>'; return; }
+      const W = wrap.clientWidth || 600, H = 160, pt = 8;
+      const bw = W/data.length, bw2 = Math.max(2, bw*0.32), g = Math.max(1, bw*0.07);
+      const maxV = Math.max(1, ...data.map(d => Math.max(d.event_count, d.unique_users)));
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox','0 0 '+W+' '+H);
+      svg.setAttribute('preserveAspectRatio','none');
+      svg.style.cssText = 'width:100%;height:100%';
+      [0.25,0.5,0.75,1].forEach(f => {
+        const y = pt + (H-pt)*(1-f);
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',0); line.setAttribute('x2',W);
+        line.setAttribute('y1',y); line.setAttribute('y2',y);
+        line.setAttribute('stroke','#2d3148'); line.setAttribute('stroke-width','0.5');
+        svg.appendChild(line);
+      });
+      data.forEach((d,i) => {
+        const cx = i*bw+bw/2;
+        const evH = (d.event_count/maxV)*(H-pt), usH = (d.unique_users/maxV)*(H-pt);
+        const b1 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        b1.setAttribute('x', cx-bw2-g/2); b1.setAttribute('y', H-evH);
+        b1.setAttribute('width', bw2); b1.setAttribute('height', Math.max(1,evH));
+        b1.setAttribute('fill','#6c63ff'); b1.setAttribute('rx','2'); b1.setAttribute('opacity','0.75');
+        const t1 = document.createElementNS('http://www.w3.org/2000/svg','title');
+        t1.textContent = d.label+': '+d.event_count+' hodisa'; b1.appendChild(t1); svg.appendChild(b1);
+        const b2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        b2.setAttribute('x', cx+g/2); b2.setAttribute('y', H-usH);
+        b2.setAttribute('width', bw2); b2.setAttribute('height', Math.max(1,usH));
+        b2.setAttribute('fill','#06b6d4'); b2.setAttribute('rx','2'); b2.setAttribute('opacity','0.55');
+        const t2 = document.createElementNS('http://www.w3.org/2000/svg','title');
+        t2.textContent = d.label+': '+d.unique_users+' foydalanuvchi'; b2.appendChild(t2); svg.appendChild(b2);
+      });
+      wrap.appendChild(svg);
+      const step = Math.max(1, Math.ceil(data.length/8));
+      for (let i = 0; i < data.length; i+=step) {
+        const s = document.createElement('span'); s.textContent = data[i].label; lbls.appendChild(s);
+      }
+    }
+
+    const EX_EMOJI = {
+      'Kartochka':'🗂️','Bir taraf':'🃏','Test':'✅',"Ta'rifni top":'📖',
+      "Gapni to'ldir":'✏️',"Eshitib yig'ish":'👂','Eshitib yozish':'🎧',
+      'Juftlash':'🔗','Chizib ulash':'📐','Qidiruv':'🔍','Pufakchalar':'🎈','Neon Tank':'🎮'
     };
 
-    /* ==========================================================
-       DOM refs
-       ========================================================== */
-    const $ = (id) => document.getElementById(id);
-    const loadingBar = $('loading-bar');
-
-    /* ==========================================================
-       HELPERS
-       ========================================================== */
-    function showLoading() { loadingBar.classList.add('active'); }
-    function hideLoading() { loadingBar.classList.remove('active'); }
-
-    function showError(msg) {
-      const slot = $('error-slot');
-      const banner = document.createElement('div');
-      banner.className = 'error-banner';
-      banner.innerHTML = `⚠️ ${msg}`;
-      slot.appendChild(banner);
-      setTimeout(() => banner.remove(), 8000);
-    }
-
-    function switchTab(tabName) {
-      // Hide all panels
-      document.querySelectorAll('.tab-panel').forEach((panel) => {
-        panel.classList.remove('active');
-      });
-      // Deactivate all buttons
-      document.querySelectorAll('.tab-button').forEach((btn) => {
-        btn.classList.remove('active');
-      });
-      // Show selected panel
-      const panel = $(`${tabName}`);
-      if (panel) {
-        panel.classList.add('active');
-      }
-      // Activate selected button
-      const btn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
-      if (btn) {
-        btn.classList.add('active');
-      }
-    }
-
-    function formatTimeAgo(isoString) {
-      if (!isoString) return 'Noma\'lum';
-      const diffMs = Date.now() - new Date(isoString).getTime();
-      const minutes = Math.floor(diffMs / 60000);
-      if (minutes < 1) return 'hozir';
-      if (minutes < 60) return `${minutes} daq oldin`;
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${hours} soat oldin`;
-      const days = Math.floor(hours / 24);
-      return `${days} kun oldin`;
-    }
-
-    function formatMinutes(minutes) {
-      if (!minutes) return '0 daq';
-      if (minutes < 60) return `${minutes} daq`;
-      const hours = Math.floor(minutes / 60);
-      const rest = minutes % 60;
-      return rest ? `${hours}s ${rest}d` : `${hours} soat`;
-    }
-
-    function getStatusInfo(isoString) {
-      if (!isoString) return { cls: 'offline', text: 'Noma\'lum', color: 'var(--text-muted)' };
-      const diffMs = Date.now() - new Date(isoString).getTime();
-      const minutes = Math.floor(diffMs / 60000);
-      if (minutes < 5) return { cls: 'online', text: 'Online', color: 'var(--green)' };
-      if (minutes < 60) return { cls: 'recent', text: formatTimeAgo(isoString), color: 'var(--orange)' };
-      return { cls: 'offline', text: formatTimeAgo(isoString), color: 'var(--text-muted)' };
-    }
-
-    function animateValue(el, end) {
-      const start = 0;
-      const duration = 600;
-      const startTime = performance.now();
-      function update(now) {
-        const progress = Math.min((now - startTime) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        el.textContent = Math.round(start + (end - start) * eased);
-        if (progress < 1) requestAnimationFrame(update);
-      }
-      requestAnimationFrame(update);
-    }
-
-    /* ==========================================================
-       BUILD QUERY STRING
-       ========================================================== */
-    function qs(params) {
-      const clean = {};
-      for (const [k, v] of Object.entries(params)) {
-        if (v !== undefined && v !== '' && v !== 'all') clean[k] = v;
-      }
-      const s = new URLSearchParams(clean).toString();
-      return s ? '?' + s : '';
-    }
-
-    /* ==========================================================
-       RENDER: Rank List (progress bars)
-       ========================================================== */
-    function renderRankList(container, rows, nameKey, countKey, emptyText, colorVar) {
-      container.innerHTML = '';
-      if (!rows || rows.length === 0) {
-        container.innerHTML = `<div class="empty-state">${emptyText}</div>`;
-        return;
-      }
-      const maxCount = Math.max(...rows.map((r) => r[countKey]));
-      rows.forEach((row, i) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'rank-row';
-        wrap.style.animationDelay = `${i * 0.03}s`;
-
-        wrap.innerHTML = `
-          <div class="top-line">
-            <span class="name">${row[nameKey]}</span>
-            <span class="count">${row[countKey].toLocaleString()}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="background: ${colorVar || 'var(--accent-gradient)'}"></div>
-          </div>
-        `;
-        container.appendChild(wrap);
-
-        // Animate bar width
-        requestAnimationFrame(() => {
-          const pct = Math.max(4, (row[countKey] / maxCount) * 100);
-          wrap.querySelector('.bar-fill').style.width = `${pct}%`;
-        });
+    function renderExercises(data) {
+      const c = $('exercise-list'); c.innerHTML = '';
+      $('ex-count').textContent = data ? data.length : 0;
+      if (!data || !data.length) { c.innerHTML = '<div class="empty">Hali mashq natijalari yo\'q</div>'; return; }
+      data.forEach((ex, i) => {
+        const pct = ex.avg_total ? Math.round((ex.avg_correct/ex.avg_total)*100) : 0;
+        const d = document.createElement('div'); d.className = 'exercise-card fade-in';
+        d.style.animationDelay = (i*0.03)+'s';
+        d.innerHTML = '<div class="ex-badge">'+(EX_EMOJI[ex.label]||'🎯')+'</div>'
+          +'<div class="ex-info"><div class="ex-name">'+ex.label+'</div><div class="ex-sub">'+ex.usage_count+' marta ishlatilgan</div></div>'
+          +'<div class="ex-stats"><div class="ex-stat"><div class="ex-stat-val blue">'+ex.unique_users+'</div><div class="ex-stat-label">Foydalanuvchi</div></div>'
+          +'<div class="ex-stat"><div class="ex-stat-val green">'+pct+'%</div><div class="ex-stat-label">O\'rtacha</div></div></div>';
+        c.appendChild(d);
       });
     }
 
-    /* ==========================================================
-       RENDER: Activity Chart (SVG)
-       ========================================================== */
-    function renderChart(container, labelsContainer, data) {
-      container.innerHTML = '';
-      labelsContainer.innerHTML = '';
-      if (!data || data.length === 0) {
-        container.innerHTML = '<div class="empty-state">Ma\'lumot yo\'q</div>';
-        return;
-      }
-
-      const width = container.clientWidth || 500;
-      const height = 140;
-      const padding = { top: 10, bottom: 4, left: 0, right: 0 };
-      const chartW = width - padding.left - padding.right;
-      const chartH = height - padding.top - padding.bottom;
-
-      const maxEvents = Math.max(1, ...data.map((d) => d.event_count));
-      const maxUsers = Math.max(1, ...data.map((d) => d.unique_users));
-      const maxVal = Math.max(maxEvents, maxUsers);
-
-      const barGroupWidth = chartW / data.length;
-      const barWidth = Math.max(2, barGroupWidth * 0.35);
-      const gap = Math.max(1, barGroupWidth * 0.08);
-
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-      svg.setAttribute('class', 'chart-svg');
-      svg.setAttribute('preserveAspectRatio', 'none');
-
-      // Grid lines
-      for (let i = 0; i <= 3; i++) {
-        const y = padding.top + (chartH / 3) * i;
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', padding.left);
-        line.setAttribute('x2', width - padding.right);
-        line.setAttribute('y1', y);
-        line.setAttribute('y2', y);
-        line.setAttribute('stroke', 'var(--border)');
-        line.setAttribute('stroke-width', '0.5');
-        svg.appendChild(line);
-      }
-
-      data.forEach((d, i) => {
-        const x = padding.left + i * barGroupWidth + barGroupWidth / 2;
-
-        // Events bar
-        const evH = (d.event_count / maxVal) * chartH;
-        const evRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        evRect.setAttribute('x', x - barWidth - gap / 2);
-        evRect.setAttribute('y', padding.top + chartH - evH);
-        evRect.setAttribute('width', barWidth);
-        evRect.setAttribute('height', Math.max(0, evH));
-        evRect.setAttribute('class', 'chart-bar');
-        evRect.setAttribute('rx', '3');
-
-        // Tooltip title
-        const evTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        evTitle.textContent = `${d.label}: ${d.event_count} hodisa`;
-        evRect.appendChild(evTitle);
-
-        svg.appendChild(evRect);
-
-        // Users bar
-        const usH = (d.unique_users / maxVal) * chartH;
-        const usRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        usRect.setAttribute('x', x + gap / 2);
-        usRect.setAttribute('y', padding.top + chartH - usH);
-        usRect.setAttribute('width', barWidth);
-        usRect.setAttribute('height', Math.max(0, usH));
-        usRect.setAttribute('class', 'chart-bar-users');
-        usRect.setAttribute('rx', '3');
-
-        const usTitle = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-        usTitle.textContent = `${d.label}: ${d.unique_users} foydalanuvchi`;
-        usRect.appendChild(usTitle);
-
-        svg.appendChild(usRect);
-      });
-
-      container.appendChild(svg);
-
-      // Labels (show every Nth label to avoid crowding)
-      const maxLabels = Math.min(data.length, 8);
-      const step = Math.max(1, Math.ceil(data.length / maxLabels));
-      for (let i = 0; i < data.length; i += step) {
-        const span = document.createElement('span');
-        span.textContent = data[i].label;
-        labelsContainer.appendChild(span);
-      }
-    }
-
-    /* ==========================================================
-       RENDER: Exercise Details
-       ========================================================== */
-    function renderExercises(container, exercises) {
-      container.innerHTML = '';
-      $('exercise-count').textContent = exercises ? exercises.length : 0;
-
-      if (!exercises || exercises.length === 0) {
-        container.innerHTML = '<div class="empty-state">Hali mashq natijalari yo\'q</div>';
-        return;
-      }
-
-      exercises.forEach((ex) => {
-        const card = document.createElement('div');
-        card.className = 'exercise-card';
-
-        const avgPct = ex.avg_total ? Math.round((ex.avg_correct / ex.avg_total) * 100) : 0;
-
-        card.innerHTML = `
-          <div class="exercise-top">
-            <div class="exercise-name">${ex.label}</div>
-            <div class="exercise-usage">${ex.usage_count} marta</div>
-          </div>
-          <div class="exercise-stats">
-            <div class="exercise-stat">
-              <div class="exercise-stat-value blue">${ex.unique_users}</div>
-              <div class="exercise-stat-label">Foydalanuvchi</div>
-            </div>
-            <div class="exercise-stat">
-              <div class="exercise-stat-value green">${avgPct}%</div>
-              <div class="exercise-stat-label">O'rtacha ball</div>
-            </div>
-            <div class="exercise-stat">
-              <div class="exercise-stat-value orange">${ex.pass_rate}%</div>
-              <div class="exercise-stat-label">O'tish %</div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    /* ==========================================================
-       RENDER: Users
-       ========================================================== */
-    function renderUsers(container, users) {
-      container.innerHTML = '';
-
-      if (!users || users.length === 0) {
-        container.innerHTML = '<div class="empty-state">Foydalanuvchi topilmadi</div>';
-        return;
-      }
-
-      users.forEach((user) => {
-        const card = document.createElement('div');
-        card.className = 'user-card';
-
-        const status = getStatusInfo(user.last_active);
-        const avgScore = user.avg_score.correct !== null
-          ? `${user.avg_score.correct.toFixed(1)}/${user.avg_score.total.toFixed(1)}`
-          : '—';
-
-        card.innerHTML = `
-          <div class="user-card-header">
-            <div class="user-identity">
-              <div class="user-name">${user.name}</div>
-              ${user.phone_number ? `<div class="user-phone">${user.phone_number}</div>` : ''}
-            </div>
-            <div class="user-right">
-              <div class="user-status" style="color: ${status.color}">
-                <span class="status-dot ${status.cls}"></span>
-                ${status.text}
-              </div>
-              <span class="user-expand-arrow">▼</span>
-            </div>
-          </div>
-          <div class="user-detail">
-            <div class="user-detail-inner">
-              <div class="user-meta-grid">
-                <div class="meta-item">
-                  <span class="meta-label">O'rtacha ball</span>
-                  <span class="meta-value">${avgScore}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Testlar</span>
-                  <span class="meta-value">${user.quizzes_taken}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Bugun faol</span>
-                  <span class="meta-value">${formatMinutes(user.today_active_minutes)}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Sahifalar</span>
-                  <span class="meta-value">${user.total_page_views}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Sev. mashq</span>
-                  <span class="meta-value">${user.favorite_mode || '—'}</span>
-                </div>
-                <div class="meta-item">
-                  <span class="meta-label">Kitoblar</span>
-                  <span class="meta-value">${user.books_viewed}</span>
-                </div>
-              </div>
-              ${user.last_screen ? `<div style="margin-top:10px; font-size:11px; color:var(--text-muted);">Oxirgi sahifa: <strong style="color:var(--text-secondary)">${user.last_screen}</strong></div>` : ''}
-              <div class="timeline" id="timeline-${user.id}"></div>
-            </div>
-          </div>
-        `;
-
-        // Expand/Collapse
+    function renderUsers(users) {
+      const c = $('user-list'); c.innerHTML = '';
+      if (!users || !users.length) { c.innerHTML = '<div class="empty">Foydalanuvchi topilmadi</div>'; return; }
+      users.forEach((u, i) => {
+        const st = statusInfo(u.last_active);
+        const avg = u.avg_score && u.avg_score.correct !== null
+          ? u.avg_score.correct.toFixed(1)+'/'+u.avg_score.total.toFixed(1) : '—';
+        const card = document.createElement('div'); card.className = 'user-card fade-in';
+        card.style.animationDelay = (i*0.03)+'s';
+        card.innerHTML = '<div class="user-head">'
+          +'<div class="user-avatar">'+initials(u.name)+'</div>'
+          +'<div class="user-info"><div class="user-name">'+(u.name||"Noma'lum")+'</div>'
+          +'<div class="user-sub">'+(u.phone_number||(u.username?'@'+u.username:"Telefon yo'q"))+'</div></div>'
+          +'<div class="user-right"><div class="status-badge" style="color:'+st.color+'">'
+          +'<span class="status-dot '+st.cls+'"></span>'+st.text+'</div>'
+          +'<span class="chevron">▼</span></div></div>'
+          +'<div class="user-body"><div class="user-body-inner">'
+          +'<div class="user-meta">'
+          +'<div class="meta-box"><span class="meta-lbl">Test bali</span><div class="meta-val">'+avg+'</div></div>'
+          +'<div class="meta-box"><span class="meta-lbl">Testlar</span><div class="meta-val">'+u.quizzes_taken+'</div></div>'
+          +'<div class="meta-box"><span class="meta-lbl">Bugun faol</span><div class="meta-val">'+fmtMin(u.today_active_minutes)+'</div></div>'
+          +'<div class="meta-box"><span class="meta-lbl">Sahifalar</span><div class="meta-val">'+u.total_page_views+'</div></div>'
+          +'<div class="meta-box"><span class="meta-lbl">Sev. mashq</span><div class="meta-val" style="font-size:12px">'+(u.favorite_mode||'—')+'</div></div>'
+          +'<div class="meta-box"><span class="meta-lbl">Kitoblar</span><div class="meta-val">'+u.books_viewed+'</div></div>'
+          +'</div>'
+          +(u.last_screen ? '<div class="user-last">Oxirgi sahifa: <span>'+u.last_screen+'</span></div>' : '')
+          +'<div class="user-timeline" id="tl-'+u.id+'"></div>'
+          +'</div></div>';
         card.addEventListener('click', () => {
-          const wasExpanded = card.classList.contains('expanded');
-          // Collapse all
-          document.querySelectorAll('.user-card.expanded').forEach((c) => c.classList.remove('expanded'));
-          if (!wasExpanded) {
+          const wasOpen = card.classList.contains('expanded');
+          document.querySelectorAll('.user-card.expanded').forEach(c => c.classList.remove('expanded'));
+          if (!wasOpen) {
             card.classList.add('expanded');
-            if (!card.dataset.timelineLoaded) {
-              card.dataset.timelineLoaded = '1';
-              loadUserTimeline(user.id);
-            }
+            if (!card.dataset.tlLoaded) { card.dataset.tlLoaded='1'; loadTimeline(u.id); }
           }
         });
-
-        container.appendChild(card);
+        c.appendChild(card);
       });
     }
 
-    async function loadUserTimeline(userId) {
-      const el = $(`timeline-${userId}`);
-      if (el) el.innerHTML = '<div class="skeleton">Yuklanmoqda...</div>';
+    function renderPagination(total) {
+      const pages = Math.max(1, Math.ceil(total/state.limit));
+      const cur = Math.floor(state.offset/state.limit)+1;
+      $('page-info').textContent = cur+' / '+pages+' sahifa';
+      $('btn-prev').disabled = state.offset === 0;
+      $('btn-next').disabled = cur >= pages;
+    }
+
+    async function loadTimeline(userId) {
+      const el = $('tl-'+userId);
+      if (el) el.innerHTML = '<div class="skel">Yuklanmoqda</div>';
       try {
-        const res = await fetch(`/api/admin/users/${userId}/timeline`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch('/api/admin/users/'+userId+'/timeline');
+        if (!res.ok) throw new Error();
         const data = await res.json();
-        renderUserTimeline(userId, data.timeline);
-      } catch (e) {
-        if (el) el.innerHTML = `<div class="empty-state">Tarixni yuklab bo'lmadi</div>`;
-      }
+        if (!el) return;
+        if (!data.timeline || !data.timeline.length) { el.innerHTML = '<div class="empty" style="padding:10px">Tarix yo\'q</div>'; return; }
+        el.innerHTML = data.timeline.map(day =>
+          '<div class="tl-day"><div class="tl-date">'+day.date+'</div>'
+          +day.page_views.map(pv => '<div class="tl-item">📄 '+(pv.screen||'—')+(pv.book?' · '+pv.book:'')+'</div>').join('')
+          +day.quizzes.map(q => '<div class="tl-item">✅ '+(q.mode||'—')+': '+q.correct+'/'+q.total+(q.book?' · '+q.book:'')+'</div>').join('')
+          +'</div>').join('');
+      } catch { if (el) el.innerHTML = ''; }
     }
 
-    function renderUserTimeline(userId, timelineArray) {
-      const el = $(`timeline-${userId}`);
-      if (!el) return;
-      if (!timelineArray || timelineArray.length === 0) {
-        el.innerHTML = '<div class="empty-state">Tarix yo\'q</div>';
-        return;
-      }
-      el.innerHTML = timelineArray.map((dayData) => `
-        <div class="day">
-          <strong>${dayData.date}</strong>
-          <ul>
-            ${dayData.page_views.map((pv) => `<li>📄 ${pv.screen || 'Unknown'}${pv.book ? ` (${pv.book})` : ''}</li>`).join('')}
-            ${dayData.quizzes.map((q) => `<li>✅ ${q.mode || 'Unknown'}: ${q.correct}/${q.total}${q.book ? ` (${q.book})` : ''}</li>`).join('')}
-          </ul>
-        </div>
-      `).join('');
-    }
-
-    /* ==========================================================
-       API CALLS
-       ========================================================== */
     async function loadStats() {
       try {
-        const params = qs({ period: state.period });
-        const res = await fetch(`/api/admin/stats${params}`);
-        if (!res.ok) throw new Error('Server javob bermadi');
-        const data = await res.json();
-
-        animateValue($('total-users'), data.total_users);
-        animateValue($('daily-active'), data.daily_active_users);
-        animateValue($('weekly-active'), data.weekly_active_users);
-
-        renderRankList($('top-modes'), data.top_modes, 'label', 'selections', 'Hali mashq tanlanmagan', 'var(--accent-gradient)');
-        renderRankList($('top-books'), data.top_books, 'book', 'views', 'Ma\'lumot yo\'q', 'linear-gradient(135deg, #34d399, #22d3ee)');
-        renderRankList($('top-screens'), data.top_screens, 'screen', 'views', 'Ma\'lumot yo\'q', 'linear-gradient(135deg, #fb923c, #f87171)');
-
-        const avgEl = $('avg-score');
-        const { correct, total } = data.average_quiz_score;
-        if (correct === null) {
-          avgEl.innerHTML = '<div class="empty-state">Hali test natijalari yo\'q</div>';
-        } else {
-          avgEl.innerHTML = '';
-          const pill = document.createElement('span');
-          pill.className = 'score-pill animate-in';
-          pill.innerHTML = `${correct.toFixed(1)} <span class="of">/ ${total.toFixed(1)} to'g'ri</span>`;
-          avgEl.appendChild(pill);
-        }
-      } catch (e) {
-        showError(e.message);
-      }
+        const res = await fetch('/api/admin/stats'+qs({ period: state.period }));
+        if (!res.ok) throw new Error('Statistika yuklanmadi');
+        const d = await res.json();
+        animNum($('s-total'), d.total_users);
+        animNum($('s-daily'), d.daily_active_users);
+        animNum($('s-weekly'), d.weekly_active_users);
+        const { correct, total } = d.average_quiz_score;
+        $('s-score').textContent = correct !== null ? correct.toFixed(1)+'/'+total.toFixed(1) : '—';
+        renderRanks($('top-modes'), d.top_modes, 'label', 'selections', 'Hali mashq tanlanmagan', 'linear-gradient(90deg,#6c63ff,#a78bfa)');
+        renderRanks($('top-books'), d.top_books, 'book', 'views', "Ma'lumot yo'q", 'linear-gradient(90deg,#22c55e,#06b6d4)');
+        renderRanks($('top-screens'), d.top_screens, 'screen', 'views', "Ma'lumot yo'q", 'linear-gradient(90deg,#f59e0b,#ef4444)');
+      } catch (e) { showErr(e.message); }
     }
 
     async function loadUsers() {
+      $('user-list').innerHTML = '<div class="skel">Yuklanmoqda</div>';
       try {
-        const params = qs({
-          period: state.period,
-          search: state.search,
-          sort: state.sort,
-          limit: state.limit,
-          offset: state.offset,
-        });
-        const res = await fetch(`/api/admin/users${params}`);
-        if (!res.ok) throw new Error('Foydalanuvchilarni yuklab bo\'lmadi');
-        const data = await res.json();
-        renderUsers($('users-list'), data.users);
-        renderPagination(data.total_count);
-      } catch (e) {
-        showError(e.message);
-      }
+        const res = await fetch('/api/admin/users'+qs({ period:state.period, search:state.search, sort:state.sort, limit:state.limit, offset:state.offset }));
+        if (!res.ok) throw new Error('Foydalanuvchilar yuklanmadi');
+        const d = await res.json();
+        renderUsers(d.users);
+        renderPagination(d.total_count);
+      } catch (e) { showErr(e.message); }
     }
 
-    function renderPagination(totalCount) {
-      const totalPages = Math.max(1, Math.ceil(totalCount / state.limit));
-      const currentPage = Math.floor(state.offset / state.limit) + 1;
-      $('page-info').textContent = `Sahifa ${currentPage}/${totalPages}`;
-      $('btn-prev').disabled = state.offset === 0;
-      $('btn-next').disabled = currentPage >= totalPages;
-    }
-
-    async function loadTimeline() {
+    async function loadActivity() {
+      $('chart-wrap').innerHTML = '<div class="skel">Yuklanmoqda</div>';
       try {
-        const timelinePeriod = state.period === 'all' ? 'week' : state.period;
-        const params = qs({ period: timelinePeriod });
-        const res = await fetch(`/api/admin/activity-timeline${params}`);
-        if (!res.ok) throw new Error('Grafik yuklanmadi');
-        const data = await res.json();
-        renderChart($('chart-container'), $('chart-labels'), data);
-      } catch (e) {
-        $('chart-container').innerHTML = `<div class="empty-state">Grafik yuklanmadi</div>`;
-      }
+        const p = state.period === 'all' ? 'week' : state.period;
+        const res = await fetch('/api/admin/activity-timeline'+qs({ period: p }));
+        if (!res.ok) throw new Error();
+        renderChart(await res.json());
+      } catch { $('chart-wrap').innerHTML = '<div class="empty">Grafik yuklanmadi</div>'; }
     }
 
     async function loadExercises() {
+      $('exercise-list').innerHTML = '<div class="skel">Yuklanmoqda</div>';
       try {
-        const params = qs({ period: state.period });
-        const res = await fetch(`/api/admin/exercise-details${params}`);
-        if (!res.ok) throw new Error('Mashqlar yuklanmadi');
-        const data = await res.json();
-        renderExercises($('exercise-grid'), data);
-      } catch (e) {
-        $('exercise-grid').innerHTML = `<div class="empty-state">Mashqlar yuklanmadi</div>`;
-      }
+        const res = await fetch('/api/admin/exercise-details'+qs({ period: state.period }));
+        if (!res.ok) throw new Error();
+        renderExercises(await res.json());
+      } catch { $('exercise-list').innerHTML = '<div class="empty">Mashqlar yuklanmadi</div>'; }
     }
 
     async function loadAll() {
-      showLoading();
-      $('error-slot').innerHTML = '';
-
-      await Promise.all([loadStats(), loadUsers(), loadTimeline(), loadExercises()]);
-
-      hideLoading();
-      $('updated-at').textContent =
-        new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+      loading(true);
+      $('err-slot').innerHTML = '';
+      await Promise.all([loadStats(), loadUsers(), loadActivity(), loadExercises()]);
+      loading(false);
+      $('updated-at').textContent = 'Yangilandi: ' + new Date().toLocaleTimeString('uz-UZ', { hour:'2-digit', minute:'2-digit' });
     }
 
-    /* ==========================================================
-       EVENT LISTENERS
-       ========================================================== */
-
-    // Tab navigation
-    document.querySelectorAll('.tab-button').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tabName = btn.dataset.tab;
-        switchTab(tabName);
-      });
+    document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
+    $('period-filter').addEventListener('click', e => {
+      const c = e.target.closest('.chip'); if (!c) return;
+      document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active'); state.period = c.dataset.period; state.offset = 0; loadAll();
     });
-
-    // Period filter chips
-    $('period-filter').addEventListener('click', (e) => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      $('period-filter').querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-      chip.classList.add('active');
-      state.period = chip.dataset.period;
-      state.offset = 0;
-      loadAll();
+    $('search-input').addEventListener('input', e => {
+      clearTimeout(state.stimer);
+      state.stimer = setTimeout(() => { state.search = e.target.value.trim(); state.offset = 0; loadUsers(); }, 350);
     });
-
-    // Users search (debounced)
-    $('search-input').addEventListener('input', (e) => {
-      clearTimeout(state.searchTimeout);
-      const value = e.target.value;
-      state.searchTimeout = setTimeout(() => {
-        state.search = value.trim();
-        state.offset = 0;
-        loadUsers();
-      }, 300);
+    $('limit-select').addEventListener('change', e => { state.limit = parseInt(e.target.value); state.offset = 0; loadUsers(); });
+    $('sort-tabs').addEventListener('click', e => {
+      const t = e.target.closest('.sort-tab'); if (!t) return;
+      document.querySelectorAll('.sort-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active'); state.sort = t.dataset.sort; state.offset = 0; loadUsers();
     });
-
-    // Users page size
-    $('limit-select').addEventListener('change', (e) => {
-      state.limit = parseInt(e.target.value, 10);
-      state.offset = 0;
-      loadUsers();
-    });
-
-    // Pagination
-    $('btn-prev').addEventListener('click', () => {
-      state.offset = Math.max(0, state.offset - state.limit);
-      loadUsers();
-    });
-    $('btn-next').addEventListener('click', () => {
-      state.offset += state.limit;
-      loadUsers();
-    });
-
-    // Refresh button
+    $('btn-prev').addEventListener('click', () => { state.offset = Math.max(0, state.offset-state.limit); loadUsers(); });
+    $('btn-next').addEventListener('click', () => { state.offset += state.limit; loadUsers(); });
     $('refresh-btn').addEventListener('click', () => {
-      const btn = $('refresh-btn');
-      btn.classList.add('spinning');
-      setTimeout(() => btn.classList.remove('spinning'), 600);
-      loadAll();
+      const btn = $('refresh-btn'); btn.classList.add('spinning');
+      setTimeout(() => btn.classList.remove('spinning'), 700); loadAll();
     });
+    let rtimer;
+    window.addEventListener('resize', () => { clearTimeout(rtimer); rtimer = setTimeout(() => loadActivity(), 200); });
 
-    // Sort tabs
-    $('sort-tabs').addEventListener('click', (e) => {
-      const tab = e.target.closest('.sort-tab');
-      if (!tab) return;
-      $('sort-tabs').querySelectorAll('.sort-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      state.sort = tab.dataset.sort;
-      state.offset = 0;
-      loadUsers();
-    });
-
-
-    // Resize handler for chart
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => loadTimeline(), 200);
-    });
-
-    /* ==========================================================
-       INIT
-       ========================================================== */
     loadAll();
   </script>
 </body>
