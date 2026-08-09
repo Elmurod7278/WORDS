@@ -329,20 +329,27 @@ function showWizardStep(stepNumber) {
 // Human-readable recap of the books/units chosen in Step 1, e.g.
 // "Essential 1 (Unit 1, 2), Essential 2 (Unit 3)"
 function getSelectedUnitsSummaryText() {
-  if (state.selectedUnits.length === 0) return "";
+  if (state.selectedUnits.length === 0) return "To'plam tanlanmagan";
   const unitsByBook = {};
   state.selectedUnits.forEach(compositeKey => {
     const [book, unit] = compositeKey.split("|||");
-    const unitNum = unit.replace(/^Unit\s*/i, "");
-    if (!unitsByBook[book]) unitsByBook[book] = [];
-    unitsByBook[book].push(unitNum);
+    if (dictionaryData[book] && dictionaryData[book][unit]) {
+      if (!unitsByBook[book]) unitsByBook[book] = [];
+      if (!unitsByBook[book].includes(unit)) {
+        unitsByBook[book].push(unit);
+      }
+    }
   });
-  return Object.keys(unitsByBook)
+
+  const bookKeys = Object.keys(unitsByBook);
+  if (bookKeys.length === 0) return "To'plam tanlanmagan";
+
+  return bookKeys
     .map(book => {
-      const nums = unitsByBook[book].sort((a, b) => Number(a) - Number(b));
-      return `${book} (Unit ${nums.join(", ")})`;
+      const units = unitsByBook[book];
+      return `${book} (${units.join(", ")})`;
     })
-    .join(", ");
+    .join("; ");
 }
 
 // Fills the Step 3 "Siz tanladingiz: ..." recap with the chosen book/units and practice mode
@@ -400,6 +407,112 @@ function hideAppAlert() {
   const overlay = document.getElementById("app-alert-overlay");
   if (overlay) overlay.style.display = "none";
   appAlertConfirmCallback = null;
+}
+
+function closeAppAlert() {
+  const overlay = document.getElementById("app-alert-overlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+// 6. Local Storage Settings Sync
+function saveSettings() {
+  try {
+    localStorage.setItem("vocab_selected_books", JSON.stringify(state.selectedBooks));
+    localStorage.setItem("vocab_selected_units", JSON.stringify(state.selectedUnits));
+    localStorage.setItem("vocab_direction", state.direction);
+    localStorage.setItem("vocab_mode", state.mode);
+    localStorage.setItem("vocab_limit", state.limit.toString());
+    localStorage.setItem("vocab_question_order", state.questionOrder);
+  } catch (err) {
+    console.error("Local storage save error", err);
+  }
+}
+
+function loadSettings() {
+  try {
+    const savedBooks = localStorage.getItem("vocab_selected_books");
+    const savedUnits = localStorage.getItem("vocab_selected_units");
+    const savedDirection = localStorage.getItem("vocab_direction");
+    const savedMode = localStorage.getItem("vocab_mode");
+    const savedLimit = localStorage.getItem("vocab_limit");
+    const savedOrder = localStorage.getItem("vocab_question_order");
+
+    if (savedBooks && savedUnits) {
+      state.selectedBooks = JSON.parse(savedBooks);
+      state.selectedUnits = JSON.parse(savedUnits);
+      // Clean stale references not present in dictionaryData
+      state.selectedUnits = state.selectedUnits.filter(compositeKey => {
+        const [b, u] = compositeKey.split("|||");
+        return dictionaryData[b] && dictionaryData[b][u];
+      });
+      state.selectedBooks = state.selectedBooks.filter(b => dictionaryData[b]);
+    }
+
+    if (state.selectedUnits.length === 0) {
+      const books = Object.keys(dictionaryData);
+      if (books.length > 0) {
+        const firstBook = books[0];
+        const units = Object.keys(dictionaryData[firstBook] || {});
+        if (units.length > 0) {
+          state.selectedBooks = [firstBook];
+          state.selectedUnits = [`${firstBook}|||${units[0]}`];
+        }
+      }
+    }
+    
+    // Set active Setup book based on selected books
+    if (state.selectedBooks.length > 0) {
+      state.activeSetupBook = state.selectedBooks[0];
+    } else {
+      const firstBook = Object.keys(dictionaryData)[0];
+      if (firstBook) state.activeSetupBook = firstBook;
+    }
+    
+    if (savedDirection) {
+      state.direction = savedDirection;
+    }
+    
+    if (savedMode) {
+      state.mode = savedMode;
+    }
+    
+    if (savedLimit) {
+      state.limit = savedLimit === "Infinity" ? Infinity : parseInt(savedLimit, 10);
+    }
+
+    if (savedOrder === "random" || savedOrder === "sequential") {
+      state.questionOrder = savedOrder;
+    }
+
+    // Sync all UI states
+    renderActiveBookPanel();
+    syncSetupScreenUI();
+    syncOrderGlider();
+
+    document.querySelectorAll('#mode-chips .choice-chip').forEach(chip => {
+      chip.classList.toggle("selected", chip.dataset.val === state.mode);
+    });
+  } catch (err) {
+    console.error("Local storage loaded values corrupted. Resetting...", err);
+    state.selectedBooks = [];
+    state.selectedUnits = [];
+    const books = Object.keys(dictionaryData);
+    if (books.length > 0) {
+      const firstBook = books[0];
+      const units = Object.keys(dictionaryData[firstBook] || {});
+      if (units.length > 0) {
+        state.selectedBooks = [firstBook];
+        state.selectedUnits = [`${firstBook}|||${units[0]}`];
+      }
+    }
+    state.direction = "en-uz";
+    state.mode = "multiple";
+    state.limit = Infinity;
+    state.questionOrder = "random";
+    renderActiveBookPanel();
+    syncSetupScreenUI();
+    syncOrderGlider();
+  }
 }
 
 function initAppAlert() {
