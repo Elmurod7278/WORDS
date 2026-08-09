@@ -74,6 +74,19 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
   if (!Array.isArray(words) || words.length === 0) return [];
   await ensureDeviceIdColumn(pool);
 
+  // Tier 4: If userId is null but deviceId is passed, try to look up existing user_id for this device
+  if (!userId && deviceId) {
+    try {
+      const knownUserRes = await pool.query(
+        `SELECT user_id FROM user_words WHERE device_id = $1 AND user_id IS NOT NULL ORDER BY created_at DESC LIMIT 1;`,
+        [deviceId]
+      );
+      if (knownUserRes.rows[0] && knownUserRes.rows[0].user_id) {
+        userId = String(knownUserRes.rows[0].user_id);
+      }
+    } catch (e) {}
+  }
+
   if (userId) {
     await ensureUserExists(pool, userId);
   }

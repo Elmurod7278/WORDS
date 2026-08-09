@@ -5141,13 +5141,42 @@ function getOrCreateDeviceId() {
 }
 
 function getTelegramUserId() {
+  let userId = null;
+
+  // Tier 1: Direct Telegram WebApp SDK user object
   try {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
-      return String(tgUser.id);
+      userId = String(tgUser.id);
     }
   } catch (e) {}
-  return null;
+
+  // Tier 2: Parse raw initData string, window.location.hash, or search params
+  if (!userId) {
+    try {
+      const rawData = window.Telegram?.WebApp?.initData || window.location.hash || window.location.search || "";
+      if (rawData) {
+        const decoded = decodeURIComponent(rawData);
+        const match = decoded.match(/"id"\s*:\s*(\d+)/) || decoded.match(/user_id=(\d+)/) || decoded.match(/user%22%3A%7B%22id%22%3A(\d+)/);
+        if (match && match[1]) {
+          userId = String(match[1]);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Tier 3: Fallback to / save in localStorage
+  if (!userId) {
+    try {
+      userId = localStorage.getItem("words_tg_user_id");
+    } catch (e) {}
+  } else {
+    try {
+      localStorage.setItem("words_tg_user_id", userId);
+    } catch (e) {}
+  }
+
+  return userId;
 }
 
 function getApiHeaders() {
