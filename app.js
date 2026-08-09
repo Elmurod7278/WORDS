@@ -5140,15 +5140,43 @@ function getOrCreateDeviceId() {
   return devId;
 }
 
+function getTelegramUserId() {
+  try {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (tgUser && tgUser.id) {
+      return String(tgUser.id);
+    }
+  } catch (e) {}
+  return null;
+}
+
+function getApiHeaders() {
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Device-Id': getOrCreateDeviceId(),
+  };
+  const tgUserId = getTelegramUserId();
+  if (tgUserId) {
+    headers['X-User-Id'] = tgUserId;
+  }
+  const initData = window.Telegram?.WebApp?.initData;
+  if (initData) {
+    headers['X-Telegram-Init-Data'] = initData;
+  }
+  return headers;
+}
+
 async function saveCustomWordsToServer(words) {
   try {
+    const tgUserId = getTelegramUserId();
     await fetch('/api/words', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Device-Id': getOrCreateDeviceId(),
-      },
-      body: JSON.stringify({ words, device_id: getOrCreateDeviceId() }),
+      headers: getApiHeaders(),
+      body: JSON.stringify({
+        words,
+        device_id: getOrCreateDeviceId(),
+        user_id: tgUserId || null
+      }),
     });
   } catch (e) {}
 }
@@ -5157,9 +5185,7 @@ async function deleteCustomWordFromServer(wordId) {
   try {
     await fetch(`/api/words/${encodeURIComponent(wordId)}`, {
       method: 'DELETE',
-      headers: {
-        'X-Device-Id': getOrCreateDeviceId(),
-      },
+      headers: getApiHeaders(),
     });
   } catch (e) {}
 }
@@ -5167,10 +5193,15 @@ async function deleteCustomWordFromServer(wordId) {
 async function syncCustomWordsWithServer() {
   try {
     try { localStorage.removeItem(CUSTOM_WORDS_KEY); } catch (e) {}
-    const res = await fetch(`/api/words?device_id=${encodeURIComponent(getOrCreateDeviceId())}`, {
-      headers: {
-        'X-Device-Id': getOrCreateDeviceId(),
-      },
+    const tgUserId = getTelegramUserId();
+    const queryParams = new URLSearchParams({
+      device_id: getOrCreateDeviceId(),
+    });
+    if (tgUserId) {
+      queryParams.append('user_id', tgUserId);
+    }
+    const res = await fetch(`/api/words?${queryParams.toString()}`, {
+      headers: getApiHeaders(),
     });
     if (res.ok) {
       const data = await res.json();

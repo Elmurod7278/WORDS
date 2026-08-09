@@ -4,57 +4,85 @@ async function ensureDeviceIdColumn(pool) {
   } catch (e) {}
 }
 
+async function ensureUserExists(pool, userId) {
+  if (!userId) return;
+  try {
+    const numId = parseInt(userId, 10);
+    if (!isNaN(numId)) {
+      await pool.query(`INSERT INTO users (id) VALUES ($1) ON CONFLICT (id) DO NOTHING;`, [numId]);
+    }
+  } catch (e) {}
+}
+
 async function getWords({ pool, userId, sessionId, deviceId }) {
   await ensureDeviceIdColumn(pool);
 
   if (userId) {
+    await ensureUserExists(pool, userId);
+    // If deviceId is present, retroactively attach orphan null user_id rows created by this deviceId
+    if (deviceId) {
+      try {
+        const numId = parseInt(userId, 10);
+        if (!isNaN(numId)) {
+          await pool.query(`UPDATE user_words SET user_id = $1 WHERE device_id = $2 AND user_id IS NULL;`, [numId, deviceId]);
+        }
+      } catch (e) {}
+    }
+
+    const numId = parseInt(userId, 10);
     const res = await pool.query(
       `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
               transcription, definition, example, collection, created_at
        FROM user_words
        WHERE user_id = $1
        ORDER BY created_at DESC`,
-      [userId]
+      [!isNaN(numId) ? numId : userId]
     );
     return res.rows;
   }
+
   if (sessionId) {
+    const numSession = parseInt(sessionId, 10);
     const res = await pool.query(
       `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
               transcription, definition, example, collection, created_at
        FROM user_words
        WHERE session_id = $1
        ORDER BY created_at DESC`,
-      [sessionId]
+      [!isNaN(numSession) ? numSession : sessionId]
     );
     return res.rows;
   }
+
   if (deviceId) {
     const res = await pool.query(
       `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
               transcription, definition, example, collection, created_at
        FROM user_words
-       WHERE device_id = $1 OR (device_id IS NULL AND user_id IS NULL AND session_id IS NULL)
+       WHERE device_id = $1
        ORDER BY created_at DESC`,
       [deviceId]
     );
     return res.rows;
   }
-  
-  // Anonymous / Test fallback: return recent words
-  const res = await pool.query(
-    `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
-            transcription, definition, example, collection, created_at
-     FROM user_words
-     ORDER BY created_at DESC
-     LIMIT 500`
-  );
-  return res.rows;
+
+  // Strict isolation: return empty array if no identity
+  return [];
 }
 
 async function saveWords({ pool, userId, sessionId, deviceId, words }) {
   if (!Array.isArray(words) || words.length === 0) return [];
   await ensureDeviceIdColumn(pool);
+
+  if (userId) {
+    await ensureUserExists(pool, userId);
+  }
+
+  const numUser = userId ? parseInt(userId, 10) : null;
+  const parsedUserId = (numUser && !isNaN(numUser)) ? numUser : (userId || null);
+
+  const numSession = sessionId ? parseInt(sessionId, 10) : null;
+  const parsedSessionId = (numSession && !isNaN(numSession)) ? numSession : (sessionId || null);
 
   const inserted = [];
 
@@ -89,7 +117,7 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
         updated_at = NOW()
       RETURNING id, source_lang as "srcLang", target_lang as "tgtLang", source, target, transcription, definition, example, collection;
     `;
-    const values = [id, userId || null, sessionId || null, deviceId || null, srcLang, tgtLang, source, target, transcription, definition, example, collection];
+    const values = [id, parsedUserId, parsedSessionId, deviceId || null, srcLang, tgtLang, source, target, transcription, definition, example, collection];
     const res = await pool.query(query, values);
     if (res.rows[0]) inserted.push(res.rows[0]);
   }

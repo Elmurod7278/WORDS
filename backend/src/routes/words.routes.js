@@ -2,12 +2,35 @@ const express = require('express');
 const { getWords, saveWords, deleteWord, clearWords } = require('../services/words.service.js');
 
 function getClientIdentity(req) {
-  const userId = req.user ? req.user.id : (req.headers['x-user-id'] ? parseInt(req.headers['x-user-id'], 10) || null : null);
+  let userId = req.user ? req.user.id : (req.headers['x-user-id'] ? String(req.headers['x-user-id']).trim() : null);
+  if (!userId && req.query?.user_id) {
+    userId = String(req.query.user_id).trim();
+  }
+  if (!userId && req.body?.user_id) {
+    userId = String(req.body.user_id).trim();
+  }
+
+  // Extract from Telegram initData if available
+  const initDataStr = req.headers['x-telegram-init-data'];
+  if (!userId && initDataStr) {
+    try {
+      const params = new URLSearchParams(initDataStr);
+      const userJSON = params.get('user');
+      if (userJSON) {
+        const parsedUser = JSON.parse(userJSON);
+        if (parsedUser && parsedUser.id) {
+          userId = String(parsedUser.id).trim();
+        }
+      }
+    } catch (e) {}
+  }
+
   const sessionId = req.query.session_id || req.headers['x-session-id'] || req.body?.session_id;
   const deviceId = req.headers['x-device-id'] || req.query.device_id || req.body?.device_id;
+
   return {
     userId: userId || null,
-    sessionId: sessionId ? (parseInt(sessionId, 10) || null) : null,
+    sessionId: sessionId ? String(sessionId).trim() : null,
     deviceId: deviceId ? String(deviceId).trim() : null,
   };
 }
