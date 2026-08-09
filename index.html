@@ -810,6 +810,9 @@
                     </div>
                 </div>
 
+                <!-- Collections Bar -->
+                <div class="custom-collections-bar" id="custom-collections-bar" style="display:none; padding: 4px 16px 8px; gap: 8px; flex-wrap: wrap;"></div>
+
                 <!-- Search & Filter -->
                 <div class="custom-search-row">
                     <div class="custom-search-input-wrap">
@@ -967,6 +970,48 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     Saqlash
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: To'plamni tahrirlash (Edit Collection & batch words) -->
+    <div class="cw-modal-overlay" id="collection-modal-overlay" style="display:none;">
+        <div class="cw-modal" style="max-width: 580px;">
+            <div class="cw-modal-header">
+                <h3 class="cw-modal-title" id="coll-modal-title">To'plamni tahrirlash</h3>
+                <button type="button" class="cw-modal-close" id="coll-modal-close-btn" aria-label="Yopish">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="cw-modal-body">
+                <input type="hidden" id="coll-original-name" value="">
+                <div class="cw-field">
+                    <label class="cw-label">To'plam nomi</label>
+                    <input type="text" id="coll-edit-name" class="cw-input" placeholder="To'plam nomini kiriting..." autocomplete="off">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 14px; margin-bottom: 8px;">
+                    <label class="cw-label" style="margin: 0;">To'plamdagi so'zlar (<span id="coll-words-count">0</span> ta)</label>
+                    <button type="button" class="btn-action-ghost" id="coll-add-word-btn" style="padding: 4px 10px; font-size: 0.8rem; border-radius: 8px;">
+                        + So'z qo'shish
+                    </button>
+                </div>
+
+                <!-- Dynamic word rows in collection -->
+                <div class="cw-words-container" id="coll-words-container" style="max-height: 340px; overflow-y: auto;">
+                </div>
+            </div>
+            <div class="cw-modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn-action-ghost" id="coll-delete-btn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                    🗑 To'plamni o'chirish
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-action-ghost" id="coll-cancel-btn">Bekor qilish</button>
+                    <button type="button" class="btn-action" id="coll-save-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Barchasini saqlash
+                    </button>
+                </div>
             </div>
         </div>
     </div>

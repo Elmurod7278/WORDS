@@ -5190,6 +5190,28 @@ function renderCustomWordsScreen(filterText, filterLang) {
     langFilterEl.value = currentVal;
   }
 
+  // Render Top Collections Bar
+  const collBar = document.getElementById("custom-collections-bar");
+  if (collBar) {
+    collBar.innerHTML = "";
+    if (collections.size > 0) {
+      collBar.style.display = "flex";
+      collections.forEach(collName => {
+        const collWordsCount = sortedWords.filter(x => x.collection === collName).length;
+        const chip = document.createElement("div");
+        chip.className = "custom-coll-chip";
+        chip.title = `'${collName}' to'plami va uning barcha so'zlarini tahrirlash`;
+        chip.innerHTML = `<span>📁 ${escapeHTML(collName)}</span><span style="opacity:0.75; font-size:0.75rem;">(${collWordsCount} so'z)</span> <span class="edit-icon">✏️</span>`;
+        chip.addEventListener("click", () => {
+          openEditCollectionModal(collName);
+        });
+        collBar.appendChild(chip);
+      });
+    } else {
+      collBar.style.display = "none";
+    }
+  }
+
   // Empty state handling
   if (words.length === 0) {
     if (emptyState) emptyState.style.display = "flex";
@@ -5233,9 +5255,17 @@ function renderCustomWordsScreen(filterText, filterLang) {
       </div>
       <div class="custom-word-card-footer">
         <span class="custom-lang-badge">${langLabel}</span>
-        ${w.collection ? `<span class="custom-collection-badge">📁 ${escapeHTML(w.collection)}</span>` : ""}
+        ${w.collection ? `<span class="custom-collection-badge coll-tag-clickable" style="cursor:pointer;" title="To'plamni tahrirlash">📁 ${escapeHTML(w.collection)} ✏️</span>` : ""}
       </div>
     `;
+
+    // Click on collection tag -> open Edit Collection modal
+    const collBadge = card.querySelector(".custom-collection-badge");
+    if (collBadge && w.collection) {
+      collBadge.addEventListener("click", () => {
+        openEditCollectionModal(w.collection);
+      });
+    }
 
     // Audio
     card.querySelector(".custom-word-action-btn.audio").addEventListener("click", () => {
@@ -5573,6 +5603,179 @@ function saveCustomWordFromModal() {
   }
 }
 
+// ---- Collection Batch Edit Modal ----
+function openEditCollectionModal(collName) {
+  const overlay = document.getElementById("collection-modal-overlay");
+  const origNameInput = document.getElementById("coll-original-name");
+  const editNameInput = document.getElementById("coll-edit-name");
+  const titleEl = document.getElementById("coll-modal-title");
+  const countSpan = document.getElementById("coll-words-count");
+  const container = document.getElementById("coll-words-container");
+
+  if (!overlay || !container) return;
+
+  const words = loadCustomWords().filter(w => w.collection === collName);
+  if (words.length === 0) return;
+
+  if (origNameInput) origNameInput.value = collName;
+  if (editNameInput) editNameInput.value = collName;
+  if (titleEl) titleEl.textContent = `'${collName}' to'plamini tahrirlash`;
+  if (countSpan) countSpan.textContent = words.length;
+
+  container.innerHTML = "";
+  words.forEach(w => {
+    addCollectionWordRow(container, w);
+  });
+
+  overlay.style.display = "flex";
+}
+
+function closeCollectionModal() {
+  const overlay = document.getElementById("collection-modal-overlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+function addCollectionWordRow(container, wordObj = null) {
+  const src = wordObj ? wordObj.source : "";
+  const tgt = wordObj ? wordObj.target : "";
+  const id = wordObj ? wordObj.id : generateCustomWordId();
+  const srcLang = wordObj ? wordObj.srcLang : "en";
+  const tgtLang = wordObj ? wordObj.tgtLang : "uz";
+
+  const card = document.createElement("div");
+  card.className = "cw-word-row-card coll-word-item";
+  card.dataset.wordId = id;
+  card.dataset.srcLang = srcLang;
+  card.dataset.tgtLang = tgtLang;
+
+  card.innerHTML = `
+    <div class="cw-word-row-main">
+      <div class="cw-word-row-inputs">
+        <div class="cw-field">
+          <input type="text" class="cw-input coll-src-input" placeholder="So'z" value="${escapeHTML(src)}" autocomplete="off">
+        </div>
+        <div class="cw-field">
+          <input type="text" class="cw-input coll-tgt-input" placeholder="Tarjima" value="${escapeHTML(tgt)}" autocomplete="off">
+        </div>
+      </div>
+      <div class="cw-word-row-actions">
+        <button type="button" class="cw-row-remove-btn coll-row-del-btn" title="So'zni o'chirish" style="display: flex;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  `;
+
+  card.querySelector(".coll-row-del-btn").addEventListener("click", () => {
+    card.remove();
+    updateCollWordsCount();
+  });
+
+  container.appendChild(card);
+  updateCollWordsCount();
+}
+
+function updateCollWordsCount() {
+  const container = document.getElementById("coll-words-container");
+  const countSpan = document.getElementById("coll-words-count");
+  if (container && countSpan) {
+    const items = container.querySelectorAll(".coll-word-item");
+    countSpan.textContent = items.length;
+  }
+}
+
+async function saveCollectionEditModal() {
+  const origName = document.getElementById("coll-original-name")?.value || "";
+  const newName = (document.getElementById("coll-edit-name")?.value || "").trim();
+  const container = document.getElementById("coll-words-container");
+  if (!container) return;
+
+  if (!newName) {
+    showAppAlert("To'plam nomi bo'sh", "Iltimos, to'plam nomini kiriting!");
+    return;
+  }
+
+  const items = container.querySelectorAll(".coll-word-item");
+  const updatedRows = [];
+  const activeIds = new Set();
+
+  items.forEach(card => {
+    const wordId = card.dataset.wordId;
+    const srcLang = card.dataset.srcLang || "en";
+    const tgtLang = card.dataset.tgtLang || "uz";
+    const src = (card.querySelector(".coll-src-input")?.value || "").trim();
+    const tgt = (card.querySelector(".coll-tgt-input")?.value || "").trim();
+
+    if (src && tgt) {
+      activeIds.add(wordId);
+      updatedRows.push({
+        id: wordId,
+        srcLang,
+        tgtLang,
+        source: src,
+        target: tgt,
+        collection: newName,
+        createdAt: Date.now(),
+      });
+    }
+  });
+
+  if (updatedRows.length === 0) {
+    showAppAlert("So'zlar yo'q", "Iltimos, kamida bitta so'z va uning tarjimasini kiriting!");
+    return;
+  }
+
+  let words = loadCustomWords();
+
+  // Find removed words from this collection and delete them from server
+  const origWordsInColl = words.filter(w => w.collection === origName);
+  origWordsInColl.forEach(w => {
+    if (!activeIds.has(w.id)) {
+      deleteCustomWordFromServer(w.id);
+    }
+  });
+
+  // Remove old words of this collection from local cache array
+  words = words.filter(w => w.collection !== origName);
+
+  // Add/Update updated rows
+  updatedRows.forEach(row => {
+    const existingIdx = words.findIndex(w => w.id === row.id);
+    if (existingIdx > -1) {
+      words[existingIdx] = { ...words[existingIdx], ...row };
+    } else {
+      words.push(row);
+    }
+  });
+
+  saveCustomWords(words);
+  closeCollectionModal();
+  renderCustomWordsScreen(
+    document.getElementById("custom-search-input")?.value || "",
+    document.getElementById("custom-lang-filter")?.value || "all"
+  );
+  showAppAlert("✅ Saqlandi", `'${newName}' to'plami va uning ${updatedRows.length} ta so'zi muvaffaqiyatli yangilandi!`);
+}
+
+function deleteCollectionModal() {
+  const origName = document.getElementById("coll-original-name")?.value || "";
+  if (!origName) return;
+
+  showAppConfirm(
+    "To'plamni o'chirish",
+    `Haqiqatan ham '${origName}' to'plami va uning barcha so'zlarini o'chirib tashlamoqchimisiz?`,
+    async () => {
+      let words = loadCustomWords();
+      const toDelete = words.filter(w => w.collection === origName);
+      toDelete.forEach(w => deleteCustomWordFromServer(w.id));
+      words = words.filter(w => w.collection !== origName);
+      saveCustomWords(words);
+      closeCollectionModal();
+      renderCustomWordsScreen();
+    }
+  );
+}
+
 // ---- Bulk Import ----
 function openBulkModal() {
   const overlay = document.getElementById("bulk-modal-overlay");
@@ -5834,6 +6037,33 @@ function initCustomWords() {
   // ---- Bulk Modal: save ----
   const bulkSaveBtn = document.getElementById("bulk-save-btn");
   if (bulkSaveBtn) bulkSaveBtn.addEventListener("click", saveBulkWords);
+
+  // ---- Collection Modal: listeners ----
+  const collCloseBtn = document.getElementById("coll-modal-close-btn");
+  const collCancelBtn = document.getElementById("coll-cancel-btn");
+  if (collCloseBtn) collCloseBtn.addEventListener("click", closeCollectionModal);
+  if (collCancelBtn) collCancelBtn.addEventListener("click", closeCollectionModal);
+
+  const collSaveBtn = document.getElementById("coll-save-btn");
+  if (collSaveBtn) collSaveBtn.addEventListener("click", saveCollectionEditModal);
+
+  const collDeleteBtn = document.getElementById("coll-delete-btn");
+  if (collDeleteBtn) collDeleteBtn.addEventListener("click", deleteCollectionModal);
+
+  const collAddWordBtn = document.getElementById("coll-add-word-btn");
+  if (collAddWordBtn) {
+    collAddWordBtn.addEventListener("click", () => {
+      const container = document.getElementById("coll-words-container");
+      if (container) addCollectionWordRow(container, null);
+    });
+  }
+
+  const collOverlay = document.getElementById("collection-modal-overlay");
+  if (collOverlay) {
+    collOverlay.addEventListener("click", (e) => {
+      if (e.target === collOverlay) closeCollectionModal();
+    });
+  }
 }
 
 

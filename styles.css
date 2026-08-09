@@ -5764,6 +5764,34 @@ input, textarea, [contenteditable="true"] {
     padding: 12px 16px 4px;
 }
 
+.custom-collections-bar {
+    display: flex;
+    gap: 8px;
+    padding: 4px 16px 8px;
+    flex-wrap: wrap;
+}
+
+.custom-coll-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    color: #a78bfa;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.custom-coll-chip:hover {
+    background: rgba(124, 58, 237, 0.25);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
 .custom-stat-chip {
     flex: 1;
     background: var(--card-bg);
