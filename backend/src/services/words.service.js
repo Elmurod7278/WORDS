@@ -95,6 +95,9 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
   if (!Array.isArray(words) || words.length === 0) return [];
   await ensureDeviceIdColumn(pool);
 
+  // Security Constraint: Cap maximum batch count per request to 150 items to prevent big data floods
+  const safeWordsBatch = words.slice(0, 150);
+
   // Tier 4: If userId is null but deviceId is passed, try to look up existing user_id for this device
   if (!userId && deviceId) {
     try {
@@ -115,16 +118,16 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
 
   const inserted = [];
 
-  for (const w of words) {
-    const id = w.id || "cw_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
-    const srcLang = w.srcLang || w.source_lang || "en";
-    const tgtLang = w.tgtLang || w.target_lang || "uz";
-    const source = (w.source || "").trim();
-    const target = (w.target || "").trim();
-    const transcription = (w.transcription || "").trim();
-    const definition = (w.definition || "").trim();
-    const example = (w.example || "").trim();
-    const collection = (w.collection || "").trim();
+  for (const w of safeWordsBatch) {
+    const id = (w.id && typeof w.id === 'string') ? w.id.slice(0, 64) : ("cw_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7));
+    const srcLang = (w.srcLang || w.source_lang || "en").slice(0, 10);
+    const tgtLang = (w.tgtLang || w.target_lang || "uz").slice(0, 10);
+    const source = String(w.source || "").trim().slice(0, 300);
+    const target = String(w.target || "").trim().slice(0, 300);
+    const transcription = String(w.transcription || "").trim().slice(0, 150);
+    const definition = String(w.definition || "").trim().slice(0, 600);
+    const example = String(w.example || "").trim().slice(0, 600);
+    const collection = String(w.collection || "").trim().slice(0, 100);
 
     if (!source || !target) continue;
 
