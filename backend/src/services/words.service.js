@@ -9,26 +9,33 @@ async function ensureDeviceIdColumn(pool) {
 async function resolveInternalUserId(pool, rawId, deviceId = null) {
   if (rawId) {
     const num = parseInt(rawId, 10);
-    if (!isNaN(num) && num > 0) {
+    // Valid Telegram user IDs are positive integers. Real IDs are typically 6-10 digits.
+    if (!isNaN(num) && num > 10000 && num < 10000000000) {
       try {
-        // 1. Check if rawId matches an existing users.id (integer primary key)
-        const byId = await pool.query(`SELECT id FROM users WHERE id = $1 LIMIT 1;`, [num]);
-        if (byId.rows.length > 0) {
-          return byId.rows[0].id;
-        }
-
-        // 2. Check if rawId matches an existing users.telegram_id (bigint)
+        // 1. Check if rawId matches an existing users.telegram_id
         const byTg = await pool.query(`SELECT id FROM users WHERE telegram_id = $1 LIMIT 1;`, [num]);
         if (byTg.rows.length > 0) {
           return byTg.rows[0].id;
         }
+
+        // 2. New real Telegram user — create a row for them
+        const newUser = await pool.query(
+          `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
+           VALUES ($1, NOW(), NOW())
+           ON CONFLICT (telegram_id) DO UPDATE SET last_seen_at = NOW()
+           RETURNING id;`,
+          [num]
+        );
+        if (newUser.rows.length > 0) {
+          return newUser.rows[0].id;
+        }
       } catch (e) {
-        console.error("Failed to resolve user_id in users table:", e);
+        console.error("Failed to resolve user_id:", e.message);
       }
     }
   }
 
-  // 3. If rawId is null or invalid, check deviceId mapping
+  // 3. No Telegram ID — check if this device already has words tied to a user
   if (deviceId) {
     try {
       const knownUserRes = await pool.query(
@@ -41,7 +48,7 @@ async function resolveInternalUserId(pool, rawId, deviceId = null) {
     } catch (e) {}
   }
 
-  // Strict User Privacy Isolation: Return null if no identity found (NEVER insert dummy user rows)
+  // No valid identity — never leak another user's data
   return null;
 }
 
