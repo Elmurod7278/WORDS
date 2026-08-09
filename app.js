@@ -5194,7 +5194,7 @@ function renderCustomWordsScreen(filterText, filterLang) {
   if (words.length === 0) {
     if (emptyState) emptyState.style.display = "flex";
     if (list) list.style.display = "none";
-    if (bulkBar) bulkBar.style.display = "none";
+    if (bulkBar) bulkBar.style.display = "flex";
     return;
   }
 
@@ -5752,6 +5752,9 @@ function initCustomWords() {
   // ---- Bulk Import open ----
   const bulkOpenBtn = document.getElementById("custom-open-bulk-modal-btn");
   if (bulkOpenBtn) bulkOpenBtn.addEventListener("click", openBulkModal);
+
+  const emptyBulkBtn = document.getElementById("custom-empty-bulk-btn");
+  if (emptyBulkBtn) emptyBulkBtn.addEventListener("click", openBulkModal);
 
   // ---- Practice button from custom screen ----
   const practiceBtn = document.getElementById("custom-practice-btn");
