@@ -5465,9 +5465,24 @@ function openCustomWordModal(editId) {
   } else {
     if (titleEl) titleEl.textContent = "Yangi so'z qo'shish";
     if (editIdInput) editIdInput.value = "";
-    if (srcLangSel) srcLangSel.value = "en";
-    if (tgtLangSel) tgtLangSel.value = "uz";
-    if (collInput) collInput.value = "";
+
+    // Pre-select the last used language pair and collection name
+    const words = loadCustomWords();
+    const lastWord = words.length > 0
+      ? [...words].sort((a, b) => {
+          const timeA = a.createdAt || (a.created_at ? new Date(a.created_at).getTime() : 0) || (a.id && parseInt(a.id.split('_')[1])) || 0;
+          const timeB = b.createdAt || (b.created_at ? new Date(b.created_at).getTime() : 0) || (b.id && parseInt(b.id.split('_')[1])) || 0;
+          return timeB - timeA;
+        })[0]
+      : null;
+
+    const defaultSrc = lastWord?.srcLang || localStorage.getItem("vocab_last_srclang") || "en";
+    const defaultTgt = lastWord?.tgtLang || localStorage.getItem("vocab_last_tgtlang") || "uz";
+    const defaultColl = lastWord?.collection !== undefined ? lastWord.collection : (localStorage.getItem("vocab_last_collection") || "");
+
+    if (srcLangSel) srcLangSel.value = defaultSrc;
+    if (tgtLangSel) tgtLangSel.value = defaultTgt;
+    if (collInput) collInput.value = defaultColl;
 
     // 1 empty row
     addWordRowToModal("", "", "", "", "");
@@ -5506,6 +5521,13 @@ function saveCustomWordFromModal() {
     showAppAlert("Maydon to'ldirilmagan", "Iltimos, kamida bitta so'z va uning tarjimasini kiriting!");
     return;
   }
+
+  // Save last used selections for next time
+  try {
+    localStorage.setItem("vocab_last_srclang", srcLang);
+    localStorage.setItem("vocab_last_tgtlang", tgtLang);
+    localStorage.setItem("vocab_last_collection", collection);
+  } catch (e) {}
 
   const words = loadCustomWords();
 
