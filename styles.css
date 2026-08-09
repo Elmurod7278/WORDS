@@ -6255,11 +6255,14 @@ input, textarea, [contenteditable="true"] {
 
 .cw-modal-footer .btn-action-ghost,
 .cw-modal-footer .btn-action {
-    flex: 1;
-    height: 34px;
-    font-size: 0.80rem;
+    height: 32px;
+    font-size: 0.74rem;
     padding: 4px 10px;
     border-radius: 8px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ---- Form Fields ---- */
