@@ -829,7 +829,10 @@ function renderActiveBookPanel() {
 
   if (isCustomBook) {
     gridContainer.style.display = "flex";
+    gridContainer.style.flexDirection = "row";
     gridContainer.style.flexWrap = "wrap";
+    gridContainer.style.justifyContent = "flex-start";
+    gridContainer.style.alignItems = "center";
     gridContainer.style.gap = "6px";
     gridContainer.style.padding = "4px 0";
   } else {
@@ -854,11 +857,12 @@ function renderActiveBookPanel() {
     
     if (isCustomBook) {
       chip.style.width = "auto";
+      chip.style.flex = "0 0 auto";
+      chip.style.maxWidth = "max-content";
       chip.style.minWidth = "42px";
       chip.style.height = "32px";
       chip.style.padding = "3px 10px";
       chip.style.borderRadius = "7px";
-      chip.style.flexShrink = "0";
 
       let fontSz = "0.60rem";
       if (cleanTitle.length > 8) fontSz = "0.52rem";
@@ -4726,7 +4730,10 @@ function renderLibrarySelectionPhase() {
   const isCustomLibBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
   if (isCustomLibBook) {
     unitGrid.style.display = "flex";
+    unitGrid.style.flexDirection = "row";
     unitGrid.style.flexWrap = "wrap";
+    unitGrid.style.justifyContent = "flex-start";
+    unitGrid.style.alignItems = "center";
     unitGrid.style.gap = "6px";
   } else {
     unitGrid.style.display = "grid";
@@ -4752,10 +4759,11 @@ function renderLibrarySelectionPhase() {
 
     if (isCustomLibBook) {
       btn.style.width = "auto";
+      btn.style.flex = "0 0 auto";
+      btn.style.maxWidth = "max-content";
       btn.style.minWidth = "46px";
       btn.style.padding = "4px 12px";
       btn.style.height = "34px";
-      btn.style.flexShrink = "0";
 
       let fontSz = "0.64rem";
       if (displayTitle.length > 8) fontSz = "0.56rem";
