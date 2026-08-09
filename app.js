@@ -5594,7 +5594,16 @@ function saveCustomWordFromModal() {
   saveCustomWords(words);
   closeCustomWordModal();
   renderCustomWordsScreen(
-    // ---- Collection Batch Edit Modal ----
+    document.getElementById("custom-search-input")?.value || "",
+    document.getElementById("custom-lang-filter")?.value || "all"
+  );
+
+  if (!editId && wordPairs.length > 1) {
+    showAppAlert("✅ Saqlandi", `${wordPairs.length} ta so'z muvaffaqiyatli qo'shildi!`);
+  }
+}
+
+// ---- Collection Batch Edit Modal ----
 function openEditCollectionModal(collName) {
   const overlay = document.getElementById("collection-modal-overlay");
   const origNameInput = document.getElementById("coll-original-name");
