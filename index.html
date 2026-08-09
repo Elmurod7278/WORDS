@@ -950,11 +950,17 @@
                     <!-- Dynamic word row item with per-word optional accordion (populated by JS) -->
                 </div>
 
-                <!-- Button to dynamically add another word row -->
-                <button type="button" class="cw-add-row-btn" id="cw-add-row-btn">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    ➕ Yana so'z qo'shish (Dynamic)
-                </button>
+                <!-- Action buttons row: Add Row + Switch to Bulk -->
+                <div class="cw-modal-actions-row">
+                    <button type="button" class="cw-add-row-btn" id="cw-add-row-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        ➕ Yana so'z qo'shish
+                    </button>
+                    <button type="button" class="cw-add-row-btn" id="cw-switch-bulk-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        ⚡️ Ko'plab so'z kiritish
+                    </button>
+                </div>
 
                 <!-- Collection name for this batch (optional) -->
                 <div class="cw-field" style="margin-top: 4px;">

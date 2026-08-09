@@ -5817,11 +5817,19 @@ function initCustomWords() {
     });
   }
 
-  // ---- Word Modal: Dynamic Add Row Button ----
+  // ---- Word Modal: Dynamic Add Row & Switch to Bulk Buttons ----
   const addRowBtn = document.getElementById("cw-add-row-btn");
   if (addRowBtn) {
     addRowBtn.addEventListener("click", () => {
       addWordRowToModal("", "", "", "", "");
+    });
+  }
+
+  const switchBulkBtn = document.getElementById("cw-switch-bulk-btn");
+  if (switchBulkBtn) {
+    switchBulkBtn.addEventListener("click", () => {
+      closeCustomWordModal();
+      openBulkModal();
     });
   }
 

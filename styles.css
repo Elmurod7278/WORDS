@@ -6445,6 +6445,21 @@ input, textarea, [contenteditable="true"] {
     border-color: var(--primary);
 }
 
+.cw-modal-actions-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.cw-modal-actions-row .cw-add-row-btn {
+    flex: 1;
+    width: auto;
+    margin-top: 0;
+    padding: 10px 8px;
+    font-size: 0.8rem;
+}
+
 
 
 
