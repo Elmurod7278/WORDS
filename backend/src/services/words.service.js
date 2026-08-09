@@ -8,17 +8,18 @@ async function ensureDeviceIdColumn(pool) {
 
 async function resolveInternalUserId(pool, rawId, deviceId = null) {
   if (rawId) {
-    const num = parseInt(rawId, 10);
-    // Valid Telegram user IDs are positive integers. Real IDs are typically 6-10 digits.
-    if (!isNaN(num) && num > 10000 && num < 10000000000) {
+    // Use BigInt-safe parsing — telegram_id is BIGINT, never compare against users.id (INTEGER)
+    const num = Number(rawId);
+    // Valid Telegram user IDs: positive, at most 10 digits
+    if (Number.isFinite(num) && num > 10000 && num < 10000000000) {
       try {
-        // 1. Check if rawId matches an existing users.telegram_id
+        // 1. Match against telegram_id (BIGINT column)
         const byTg = await pool.query(`SELECT id FROM users WHERE telegram_id = $1 LIMIT 1;`, [num]);
         if (byTg.rows.length > 0) {
           return byTg.rows[0].id;
         }
 
-        // 2. New real Telegram user — create a row for them
+        // 2. New real Telegram user — register them
         const newUser = await pool.query(
           `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
            VALUES ($1, NOW(), NOW())
