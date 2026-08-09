@@ -827,15 +827,17 @@ function renderActiveBookPanel() {
 
   const isCustomBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
 
-  gridContainer.style.display = "grid";
   if (isCustomBook) {
-    gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(54px, 1fr))";
+    gridContainer.style.display = "flex";
+    gridContainer.style.flexWrap = "wrap";
     gridContainer.style.gap = "6px";
+    gridContainer.style.padding = "4px 0";
   } else {
+    gridContainer.style.display = "grid";
     gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
     gridContainer.style.gap = "4px";
+    gridContainer.style.padding = "2px 0";
   }
-  gridContainer.style.padding = "2px 0";
 
   unitNames.forEach(unitName => {
     const compositeKey = `${activeBookName}|||${unitName}`;
@@ -847,31 +849,31 @@ function renderActiveBookPanel() {
     chip.type = "button";
     chip.id = chipId;
     chip.className = `unit-chip ${isSelected ? "selected" : ""}`;
-    if (isCustomBook) {
-      chip.style.height = "32px";
-      chip.style.padding = "2px 4px";
-    }
 
     const cleanTitle = unitName.replace(/^📁\s*/, "");
-    let fontSz = "0.68rem";
-    let letterSpacing = "normal";
+    
+    if (isCustomBook) {
+      chip.style.width = "auto";
+      chip.style.minWidth = "42px";
+      chip.style.height = "32px";
+      chip.style.padding = "3px 10px";
+      chip.style.borderRadius = "7px";
+      chip.style.flexShrink = "0";
 
-    if (isNaN(parseInt(cleanTitle))) {
-      if (cleanTitle.length > 8) {
-        fontSz = "0.44rem";
-        letterSpacing = "-0.3px";
-      } else if (cleanTitle.length > 5) {
-        fontSz = "0.50rem";
-        letterSpacing = "-0.2px";
-      } else {
-        fontSz = "0.58rem";
-      }
+      let fontSz = "0.60rem";
+      if (cleanTitle.length > 8) fontSz = "0.52rem";
+
+      chip.innerHTML = `
+        <span style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; display: block; line-height: 1.15; text-align: center;">${escapeHTML(cleanTitle)}</span>
+        <span class="unit-chip-meta" style="font-size: 0.46rem;">${unitWords}</span>
+      `;
+    } else {
+      const unitNum = unitName.replace("Unit ", "");
+      chip.innerHTML = `
+        <span>${escapeHTML(unitNum)}</span>
+        <span class="unit-chip-meta">${unitWords}</span>
+      `;
     }
-
-    chip.innerHTML = `
-      <span style="font-size: ${fontSz}; letter-spacing: ${letterSpacing}; font-weight: 700; white-space: nowrap; overflow: visible; display: block; line-height: 1.1; text-align: center;">${escapeHTML(cleanTitle)}</span>
-      <span class="unit-chip-meta">${unitWords}</span>
-    `;
     
     chip.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -4721,9 +4723,15 @@ function renderLibrarySelectionPhase() {
     return;
   }
 
-  // Ensure active unit exists in current book
-  if (!unitNames.includes(state.activeBookViewUnit)) {
-    state.activeBookViewUnit = unitNames[0];
+  const isCustomLibBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
+  if (isCustomLibBook) {
+    unitGrid.style.display = "flex";
+    unitGrid.style.flexWrap = "wrap";
+    unitGrid.style.gap = "6px";
+  } else {
+    unitGrid.style.display = "grid";
+    unitGrid.style.gridTemplateColumns = "repeat(6, 1fr)";
+    unitGrid.style.gap = "5px 4px";
   }
 
   unitNames.forEach((unitName, idx) => {
@@ -4742,25 +4750,27 @@ function renderLibrarySelectionPhase() {
       displayTitle = `${srcMeta.flag} ${srcMeta.code || srcMeta.name || src} → ${tgtMeta.flag}`;
     }
 
-    let fontSz = "0.85rem";
-    let letterSpacing = "normal";
+    if (isCustomLibBook) {
+      btn.style.width = "auto";
+      btn.style.minWidth = "46px";
+      btn.style.padding = "4px 12px";
+      btn.style.height = "34px";
+      btn.style.flexShrink = "0";
 
-    if (isNaN(parseInt(displayTitle))) {
-      if (displayTitle.length > 8) {
-        fontSz = "0.50rem";
-        letterSpacing = "-0.3px";
-      } else if (displayTitle.length > 5) {
-        fontSz = "0.58rem";
-        letterSpacing = "-0.2px";
-      } else {
-        fontSz = "0.72rem";
-      }
+      let fontSz = "0.64rem";
+      if (displayTitle.length > 8) fontSz = "0.56rem";
+
+      btn.innerHTML = `
+        <span class="library-unit-num" style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; display: block; line-height: 1.15; text-align: center;">${escapeHTML(displayTitle)}</span>
+        <span class="library-unit-count" style="font-size: 0.48rem;">${wordCount} so'z</span>
+      `;
+    } else {
+      btn.innerHTML = `
+        <span class="library-unit-num" style="font-size: 0.85rem; font-weight: 700; white-space: nowrap;">${escapeHTML(displayTitle)}</span>
+        <span class="library-unit-count">${wordCount} so'z</span>
+      `;
     }
 
-    btn.innerHTML = `
-      <span class="library-unit-num" style="font-size: ${fontSz}; letter-spacing: ${letterSpacing}; font-weight: 700; white-space: nowrap; overflow: visible; display: block; line-height: 1.1; text-align: center;">${escapeHTML(displayTitle)}</span>
-      <span class="library-unit-count">${wordCount} so'z</span>
-    `;
     btn.addEventListener("click", () => {
       state.activeBookViewUnit = unitName;
       localStorage.setItem("vocab_active_unit", unitName);
