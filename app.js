@@ -1,41 +1,7 @@
 // Vocabulary Learning Application Logic - Vanilla JS (ES6+)
 
 // 1. Structured JSON Dictionary Dataset & Dynamic Starter Templates
-const defaultStarterData = {
-  "🇬🇧 Ingliz tili — Kundalik 50": {
-    "Dars 1": [
-      { en: "hello", uz: "salom", tr: "[həˈləʊ]", pos: "excl", def: "Used as a greeting of arrival or departure.", ex: "Hello! How are you doing today?", _srcLang: "en", _tgtLang: "uz" },
-      { en: "world", uz: "dunyo", tr: "[wɜːld]", pos: "n", def: "The earth, together with all of its countries and people.", ex: "Travel around the world to learn new languages.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "book", uz: "kitob", tr: "[bʊk]", pos: "n", def: "A written or printed work consisting of pages bound together.", ex: "I read an interesting book yesterday.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "learn", uz: "o'rganmoq", tr: "[lɜːn]", pos: "v", def: "Gain knowledge or skill by study or experience.", ex: "Every day is a good day to learn something new.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "happy", uz: "baxtiyor, xursand", tr: "[ˈhæpi]", pos: "adj", def: "Feeling or showing pleasure or contentment.", ex: "She was happy with her exam results.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "family", uz: "oilaviy, oila", tr: "[ˈfæmɪli]", pos: "n", def: "A group of one or more parents and their children living together.", ex: "Spending time with family is precious.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "friend", uz: "do'st", tr: "[frɛnd]", pos: "n", def: "A person with whom one has a bond of mutual affection.", ex: "A true friend is always there for you.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "journey", uz: "sayohat, yo'l", tr: "[ˈʤɜːni]", pos: "n", def: "An act of traveling from one place to another.", ex: "Enjoy every step of your language journey.", _srcLang: "en", _tgtLang: "uz" }
-    ],
-    "Dars 2": [
-      { en: "success", uz: "muvaffaqiyat", tr: "[səkˈsɛs]", pos: "n", def: "The accomplishment of an aim or purpose.", ex: "Hard work is the key to success.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "practice", uz: "amaliyot, takrorlash", tr: "[ˈpræktɪs]", pos: "n", def: "Repeated exercise to improve proficiency.", ex: "Practice makes perfect!", _srcLang: "en", _tgtLang: "uz" },
-      { en: "opportunity", uz: "imkoniyat", tr: "[ˌɒpəˈtjuːnɪti]", pos: "n", def: "A set of circumstances that makes it possible to do something.", ex: "Take every opportunity to speak in a foreign language.", _srcLang: "en", _tgtLang: "uz" },
-      { en: "knowledge", uz: "bilim", tr: "[ˈnɒlɪʤ]", pos: "n", def: "Facts, information, and skills acquired through experience or education.", ex: "Knowledge is power.", _srcLang: "en", _tgtLang: "uz" }
-    ]
-  },
-  "🇩🇪 Nemis tili — A1 Asosiy": {
-    "Dars 1": [
-      { en: "Guten Tag", uz: "Xayrli kun", tr: "[ˈɡuːtn̩ ˈtaːk]", pos: "phrase", def: "Germaniyada kundalik salomlashuv iborasi.", ex: "Guten Tag! Wie geht es Ihnen?", _srcLang: "de", _tgtLang: "uz" },
-      { en: "Danke", uz: "Rahmat", tr: "[ˈdaŋkə]", pos: "phrase", def: "Minnatdorchilik bildirish so'zi.", ex: "Danke schön für Ihre Hilfe!", _srcLang: "de", _tgtLang: "uz" },
-      { en: "Bitte", uz: "Iltimos / Marhamat", tr: "[ˈbɪtə]", pos: "phrase", def: "Iltimos yoki javob tariqasida ishlatiladi.", ex: "Sprechen Sie bitte langsam.", _srcLang: "de", _tgtLang: "uz" },
-      { en: "Wort", uz: "So'z", tr: "[vɔrt]", pos: "n", def: "Tilning ma'noli birligi.", ex: "Ein neues Wort jeden Tag lernen.", _srcLang: "de", _tgtLang: "uz" }
-    ]
-  },
-  "🇷🇺 Rus tili — Kundalik Lug'at": {
-    "Урок 1": [
-      { en: "Здравствуйте", uz: "Assalomu alaykum", tr: "[zdrəfstfujtʲə]", pos: "phrase", def: "Rasmiy salomlashuv iborasi.", ex: "Здравствуйте, рад вас видеть!", _srcLang: "ru", _tgtLang: "uz" },
-      { en: "Спасибо", uz: "Rahmat", tr: "[spɐˈsʲibə]", pos: "phrase", def: "Minnatdorchilik izhor etish.", ex: "Большое спасибо за помощь!", _srcLang: "ru", _tgtLang: "uz" },
-      { en: "Слово", uz: "So'z", tr: "[ˈslovə]", pos: "n", def: "Til elementi.", ex: "Учите новые слова каждый день.", _srcLang: "ru", _tgtLang: "uz" }
-    ]
-  }
-};
+const defaultStarterData = {};
 
 const dictionaryData = { ...defaultStarterData };
 
