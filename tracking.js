@@ -1,5 +1,5 @@
 (function () {
-  const API_BASE_URL = "https://essential.reach.uz";
+  const API_BASE_URL = "https://words.reach.uz";
   const FLUSH_INTERVAL_MS = 10000;
   const MAX_BUFFERED_EVENTS = 200;
 
