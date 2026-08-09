@@ -5342,9 +5342,6 @@ function renderCustomWordsScreen(filterText, filterLang, filterColl) {
   if (filterLang && filterLang !== "all") {
     filtered = filtered.filter(w => w.srcLang === filterLang || w.tgtLang === filterLang);
   }
-  if (collSelect && collSelect.value && collSelect.value !== "all") {
-    filtered = filtered.filter(w => w.collection === collSelect.value);
-  }
 
   // Update lang filter dropdown
   const langFilterEl = document.getElementById("custom-lang-filter");
@@ -5364,9 +5361,19 @@ function renderCustomWordsScreen(filterText, filterLang, filterColl) {
   }
 
   // Empty state handling
-  if (words.length === 0) {
+  const emptyTitle = document.querySelector(".custom-empty-title");
+  const emptyDesc = document.querySelector(".custom-empty-desc");
+
+  if (words.length === 0 || filtered.length === 0) {
     if (emptyState) emptyState.style.display = "flex";
     if (list) list.style.display = "none";
+    if (filtered.length === 0 && words.length > 0) {
+      if (emptyTitle) emptyTitle.textContent = "Hech qanday so'z topilmadi";
+      if (emptyDesc) emptyDesc.textContent = "Qidiruv yoki filtr bo'yicha mos so'zlar topilmadi.";
+    } else {
+      if (emptyTitle) emptyTitle.textContent = "Hali so'zlar yo'q";
+      if (emptyDesc) emptyDesc.textContent = '"➕ So\'z qo\'shish" tugmasini bosib o\'zingizning shaxsiy so\'zlaringizni kirating!';
+    }
     return;
   }
 
