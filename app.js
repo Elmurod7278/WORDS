@@ -5194,13 +5194,11 @@ function renderCustomWordsScreen(filterText, filterLang) {
   if (words.length === 0) {
     if (emptyState) emptyState.style.display = "flex";
     if (list) list.style.display = "none";
-    if (bulkBar) bulkBar.style.display = "flex";
     return;
   }
 
   if (emptyState) emptyState.style.display = "none";
   if (list) list.style.display = "flex";
-  if (bulkBar) bulkBar.style.display = "flex";
 
   if (!list) return;
   list.innerHTML = "";
