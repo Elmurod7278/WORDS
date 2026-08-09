@@ -2028,12 +2028,18 @@ function setupDefinitionMode(wordItem, direction) {
   const targetField = (direction === "en-uz") ? "uz" : "en";
   const correctAnswer = wordItem[targetField];
 
+  const displayDef = (wordItem.def && wordItem.def.trim())
+    ? `"${escapeHTML(wordItem.def)}"`
+    : (wordItem.ex && wordItem.ex.trim())
+      ? `"${escapeHTML(wordItem.ex)}"`
+      : `"${wordItem.en} — ${wordItem.uz}" so'zining mos tarjimasini tanlang`;
+
   questionText.innerHTML = `
     <div style="font-size: 1.1rem; line-height: 1.5; color: var(--text-main); font-weight: 500; font-style: italic;">
-      "${wordItem.def}"
+      ${displayDef}
     </div>
     <div id="def-hint-word" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; font-weight: 600; display: none;">
-      So'z: ${wordItem.en}
+      So'z: ${escapeHTML(wordItem.en)}
     </div>
   `;
 
@@ -2611,6 +2617,15 @@ function handleMultipleChoiceSelection(selectedBtn, selectedVal, correctVal) {
   
   const isCorrect = selectedVal === correctVal;
   
+  const nextBtn = document.getElementById("next-question-btn");
+  if (nextBtn) {
+    nextBtn.classList.add("answered");
+    const btnText = document.getElementById("next-btn-text");
+    if (btnText) {
+      btnText.innerText = (state.currentIndex === state.questions.length - 1) ? "Yakunlash" : "Keyingisi";
+    }
+  }
+
   if (isCorrect) {
     playSound("correct");
     selectedBtn.classList.add("correct");
@@ -2619,29 +2634,22 @@ function handleMultipleChoiceSelection(selectedBtn, selectedVal, correctVal) {
     state.streak++;
     state.maxStreak = Math.max(state.streak, state.maxStreak);
     
-    // Read English option aloud (if UZ->EN direction)
+    const advance = () => {
+      state.autoAdvanceTimeout = setTimeout(() => {
+        if (qCard) qCard.classList.remove("shake-it");
+        nextQuestion();
+      }, 700);
+    };
+
     if (currentWord.activeDirection === "uz-en") {
-      speakWord(correctVal, () => {
-        state.autoAdvanceTimeout = setTimeout(() => {
-          if (qCard) qCard.classList.remove("shake-it");
-          nextQuestion();
-        }, 800);
-      });
-      
-      const nextBtn = document.getElementById("next-question-btn");
-      if (nextBtn) {
-        nextBtn.classList.add("answered");
-        const btnText = document.getElementById("next-btn-text");
-        if (btnText) {
-          btnText.innerText = (state.currentIndex === state.questions.length - 1) ? "Yakunlash" : "Keyingisi";
-        }
-      }
-      return;
+      speakWordInLang(correctVal, currentWord._srcLang || "en", advance);
+    } else {
+      advance();
     }
   } else {
     playSound("incorrect");
     selectedBtn.classList.add("incorrect");
-    qCard.classList.add("shake-it");
+    if (qCard) qCard.classList.add("shake-it");
     state.incorrectCount++;
     state.streak = 0;
     state.mistakes.push({ word: currentWord, userAnswer: selectedVal });
@@ -2652,22 +2660,12 @@ function handleMultipleChoiceSelection(selectedBtn, selectedVal, correctVal) {
         btn.classList.add("correct");
       }
     });
+
+    state.autoAdvanceTimeout = setTimeout(() => {
+      if (qCard) qCard.classList.remove("shake-it");
+      nextQuestion();
+    }, 1200);
   }
-  
-  // Auto-advance in 1.2 seconds, or display "Next" immediately
-  const nextBtn = document.getElementById("next-question-btn");
-  if (nextBtn) {
-    nextBtn.classList.add("answered");
-    const btnText = document.getElementById("next-btn-text");
-    if (btnText) {
-      btnText.innerText = (state.currentIndex === state.questions.length - 1) ? "Yakunlash" : "Keyingisi";
-    }
-  }
-  
-  state.autoAdvanceTimeout = setTimeout(() => {
-    if (qCard) qCard.classList.remove("shake-it");
-    nextQuestion();
-  }, 1200);
 }
 
 // ============================================================
@@ -2675,6 +2673,11 @@ function handleMultipleChoiceSelection(selectedBtn, selectedVal, correctVal) {
 // ============================================================
 let wsTargetWord = "";
 let wsSelectedCells = [];
+
+function getCleanTargetLetters(str) {
+  if (!str) return "";
+  return str.toString().toUpperCase().replace(/[.,/#!$%^&*;:{}=\-_`~()?'"“”]/g, "").replace(/\s+/g, "");
+}
 
 function setupWordSearchMode(wordItem, direction) {
   const container = document.getElementById("wordsearch-mode-section");
@@ -2689,7 +2692,7 @@ function setupWordSearchMode(wordItem, direction) {
   selectedTextEl.innerText = "-";
   gridEl.innerHTML = "";
   
-  wsTargetWord = wordItem.en.toUpperCase().replace(/[^A-Z]/g, ""); // Only letters
+  wsTargetWord = getCleanTargetLetters(wordItem.en); // Clean Unicode letters
   wsSelectedCells = [];
   
   const wordLen = wsTargetWord.length;
@@ -2835,7 +2838,7 @@ function setupAudioSpellingMode(wordItem, direction) {
   slotsContainer.innerHTML = "";
   poolContainer.innerHTML = "";
   
-  asTargetWord = wordItem.en.toUpperCase().replace(/[^A-Z]/g, ""); // target word letters
+  asTargetWord = getCleanTargetLetters(wordItem.en); // target word letters
   asSelectedLetters = Array(asTargetWord.length).fill(null);
   asAttempts = 0;
   
@@ -3025,7 +3028,7 @@ function setupAudioWriteMode(wordItem, direction) {
   
   slotsContainer.innerHTML = "";
   
-  awTargetWord = wordItem.en.toUpperCase().replace(/[^A-Z]/g, ""); // target word letters
+  awTargetWord = getCleanTargetLetters(wordItem.en); // target word letters
   awAttempts = 0;
 
   // Reset input field
@@ -3037,8 +3040,8 @@ function setupAudioWriteMode(wordItem, direction) {
   }
   
   // Play pronunciation
-  playBtn.onclick = () => speakWord(wordItem.en);
-  speakWord(wordItem.en);
+  playBtn.onclick = () => speakWordInLang(wordItem.en, wordItem._srcLang || "en");
+  speakWordInLang(wordItem.en, wordItem._srcLang || "en");
   
   // Render letter slots
   for (let i = 0; i < awTargetWord.length; i++) {
@@ -3061,7 +3064,7 @@ function setupAudioWriteMode(wordItem, direction) {
     slotsContainer.onclick = () => inputEl.focus();
     
     inputEl.oninput = (e) => {
-      let val = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+      let val = getCleanTargetLetters(e.target.value);
       e.target.value = val;
       updateAudioWriteSlots(val);
       checkAudioWriteCompletion(val, wordItem);
@@ -3201,7 +3204,12 @@ function setupBalloonPopMode(wordItem, direction) {
   const targetLabel = document.getElementById("bp-target-word");
   const driftZone = document.getElementById("bp-drift-zone");
   
-  targetLabel.innerText = wordItem.uz;
+  const isEnUz = (direction === "en-uz");
+  const questionText = isEnUz ? wordItem.en : wordItem.uz;
+  const answerField = isEnUz ? "uz" : "en";
+  const correctAnswer = wordItem[answerField];
+
+  targetLabel.innerText = questionText;
   driftZone.innerHTML = "";
   
   // Clear any old loop
@@ -3215,22 +3223,25 @@ function setupBalloonPopMode(wordItem, direction) {
   const pool = state.questions.filter(w => w.en !== wordItem.en);
   const shuffledPool = shuffleArray(pool);
   for (let i = 0; i < Math.min(3, shuffledPool.length); i++) {
-    distractors.push(shuffledPool[i]);
+    const dVal = shuffledPool[i][answerField];
+    if (dVal && dVal !== correctAnswer) {
+      distractors.push(dVal);
+    }
   }
-  // If not enough distractors, fill from general dictionary data
-  const fallbackList = ["agree", "angry", "afraid", "clever", "cruel", "happy", "brave", "simple"];
+  
+  const fallbackList = ["olma", "kitob", "uy", "qalam", "quyosh", "daryo", "shahar", "do'st"];
   let fallbackIdx = 0;
   while (distractors.length < 3) {
     const val = fallbackList[fallbackIdx % fallbackList.length];
-    if (val !== wordItem.en && !distractors.some(d => d.en === val)) {
-      distractors.push({ en: val, uz: "" });
+    if (val !== correctAnswer && !distractors.includes(val)) {
+      distractors.push(val);
     }
     fallbackIdx++;
   }
   
   const options = [
-    { text: wordItem.en, isCorrect: true },
-    ...distractors.map(d => ({ text: d.en, isCorrect: false }))
+    { text: correctAnswer, isCorrect: true },
+    ...distractors.map(d => ({ text: d, isCorrect: false }))
   ];
   const shuffledOptions = shuffleArray(options);
   
