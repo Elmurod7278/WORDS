@@ -4,6 +4,16 @@ async function ensureDeviceIdColumn(pool) {
   } catch (e) {}
 }
 
+function hashStringToNum(str) {
+  if (!str) return 90000000;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash) + 10000000;
+}
+
 async function resolveInternalUserId(pool, rawId, deviceId = null) {
   if (rawId) {
     const num = parseInt(rawId, 10);
@@ -51,39 +61,28 @@ async function resolveInternalUserId(pool, rawId, deviceId = null) {
     } catch (e) {}
   }
 
-  // 5. Fallback to existing registered user in users table without inserting any dummy rows
-  try {
-    const fallback = await pool.query(`SELECT id FROM users ORDER BY id ASC LIMIT 1;`);
-    if (fallback.rows.length > 0) return fallback.rows[0].id;
-  } catch (e) {}
-
-  return 1; // Fallback integer
+  // Strict User Privacy Isolation: Return null if no identity found (NEVER leak another user's data)
+  return null;
 }
 
 async function getWords({ pool, userId, sessionId, deviceId }) {
   await ensureDeviceIdColumn(pool);
   const internalUserId = await resolveInternalUserId(pool, userId, deviceId);
 
-  if (internalUserId) {
-    // If deviceId is present, retroactively attach orphan null user_id rows created by this deviceId
-    if (deviceId) {
-      try {
-        await pool.query(`UPDATE user_words SET user_id = $1 WHERE device_id = $2 AND user_id IS NULL;`, [internalUserId, deviceId]);
-      } catch (e) {}
-    }
-
-    const res = await pool.query(
-      `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
-              transcription, definition, example, collection, created_at
-       FROM user_words
-       WHERE user_id = $1
-       ORDER BY created_at DESC`,
-      [internalUserId]
-    );
-    return res.rows;
+  // If no user identity is established, return empty array to prevent data leaks across users
+  if (!internalUserId) {
+    return [];
   }
 
-  return [];
+  const res = await pool.query(
+    `SELECT id, source_lang as "srcLang", target_lang as "tgtLang", source, target,
+            transcription, definition, example, collection, created_at
+     FROM user_words
+     WHERE user_id = $1
+     ORDER BY created_at DESC`,
+    [internalUserId]
+  );
+  return res.rows;
 }
 
 async function saveWords({ pool, userId, sessionId, deviceId, words }) {
@@ -93,7 +92,26 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
   // Security Constraint: Cap maximum batch count per request to 150 items to prevent big data floods
   const safeWordsBatch = words.slice(0, 150);
 
-  const internalUserId = await resolveInternalUserId(pool, userId, deviceId);
+  let internalUserId = await resolveInternalUserId(pool, userId, deviceId);
+
+  // If still no internalUserId, create a dedicated device user so words belong strictly to THIS device/user
+  if (!internalUserId && deviceId) {
+    try {
+      const devTgId = hashStringToNum(deviceId);
+      const newDevUser = await pool.query(
+        `INSERT INTO users (telegram_id, first_seen_at, last_seen_at)
+         VALUES ($1, NOW(), NOW())
+         ON CONFLICT (telegram_id) DO UPDATE SET last_seen_at = NOW()
+         RETURNING id;`,
+        [devTgId]
+      );
+      if (newDevUser.rows[0]) {
+        internalUserId = newDevUser.rows[0].id;
+      }
+    } catch (e) {}
+  }
+
+  if (!internalUserId) return [];
 
   const numSession = sessionId ? parseInt(sessionId, 10) : null;
   const parsedSessionId = (numSession && !isNaN(numSession)) ? numSession : (sessionId || null);
@@ -141,28 +159,22 @@ async function saveWords({ pool, userId, sessionId, deviceId, words }) {
 
 async function deleteWord({ pool, wordId, userId, sessionId, deviceId }) {
   await ensureDeviceIdColumn(pool);
-  const internalUserId = await resolveInternalUserId(pool, userId);
+  const internalUserId = await resolveInternalUserId(pool, userId, deviceId);
   
   if (internalUserId) {
     await pool.query(`DELETE FROM user_words WHERE id = $1 AND user_id = $2`, [wordId, internalUserId]);
-  } else if (sessionId) {
-    await pool.query(`DELETE FROM user_words WHERE id = $1 AND session_id = $2`, [wordId, sessionId]);
   } else if (deviceId) {
     await pool.query(`DELETE FROM user_words WHERE id = $1 AND device_id = $2`, [wordId, deviceId]);
-  } else {
-    await pool.query(`DELETE FROM user_words WHERE id = $1`, [wordId]);
   }
   return { success: true };
 }
 
 async function clearWords({ pool, userId, sessionId, deviceId }) {
   await ensureDeviceIdColumn(pool);
-  const internalUserId = await resolveInternalUserId(pool, userId);
+  const internalUserId = await resolveInternalUserId(pool, userId, deviceId);
 
   if (internalUserId) {
     await pool.query(`DELETE FROM user_words WHERE user_id = $1`, [internalUserId]);
-  } else if (sessionId) {
-    await pool.query(`DELETE FROM user_words WHERE session_id = $1`, [sessionId]);
   } else if (deviceId) {
     await pool.query(`DELETE FROM user_words WHERE device_id = $1`, [deviceId]);
   }
