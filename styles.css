@@ -6206,13 +6206,13 @@ input, textarea, [contenteditable="true"] {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 20px 12px;
+    padding: 10px 14px 8px;
     border-bottom: 1px solid var(--card-border);
     flex-shrink: 0;
 }
 
 .cw-modal-title {
-    font-size: 1rem;
+    font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
@@ -6222,9 +6222,9 @@ input, textarea, [contenteditable="true"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
     border: none;
     background: var(--option-bg);
     color: var(--text-muted);
@@ -6238,17 +6238,17 @@ input, textarea, [contenteditable="true"] {
 
 .cw-modal-body {
     overflow-y: auto;
-    padding: 14px 20px;
+    padding: 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
     flex: 1;
 }
 
 .cw-modal-footer {
     display: flex;
-    gap: 10px;
-    padding: 12px 20px 20px;
+    gap: 8px;
+    padding: 8px 12px 12px;
     border-top: 1px solid var(--card-border);
     flex-shrink: 0;
 }
@@ -6256,18 +6256,22 @@ input, textarea, [contenteditable="true"] {
 .cw-modal-footer .btn-action-ghost,
 .cw-modal-footer .btn-action {
     flex: 1;
+    height: 34px;
+    font-size: 0.80rem;
+    padding: 4px 10px;
+    border-radius: 8px;
 }
 
 /* ---- Form Fields ---- */
 .cw-field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
 }
 
 .cw-field-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .cw-field-group.cw-two-col > .cw-field {
@@ -6285,17 +6289,17 @@ input, textarea, [contenteditable="true"] {
 .cw-lang-arrow {
     display: flex;
     align-items: flex-end;
-    padding-bottom: 6px;
+    padding-bottom: 5px;
     color: var(--text-muted);
     flex-shrink: 0;
 }
 
 .cw-label {
-    font-size: 0.76rem;
-    font-weight: 600;
+    font-size: 0.62rem;
+    font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2px;
 }
 
 .cw-optional {
@@ -6310,9 +6314,10 @@ input, textarea, [contenteditable="true"] {
 .cw-textarea {
     background: var(--input-bg);
     border: 1px solid var(--input-border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 0.88rem;
+    border-radius: 7px;
+    padding: 5px 8px;
+    height: 32px;
+    font-size: 0.78rem;
     color: var(--text-main);
     font-family: inherit;
     outline: none;
@@ -6397,30 +6402,30 @@ input, textarea, [contenteditable="true"] {
 .cw-words-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
 }
 
 .cw-word-row-card {
     background: hsla(222, 47%, 18%, 0.6);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 12px;
+    border-radius: 9px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     backdrop-filter: blur(10px);
 }
 
 .cw-word-row-main {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
+    gap: 6px;
 }
 
 .cw-word-row-inputs {
     flex: 1;
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .cw-word-row-inputs .cw-field {
@@ -6438,9 +6443,9 @@ input, textarea, [contenteditable="true"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
     border: 1px solid var(--option-border);
     background: var(--option-bg);
     color: var(--text-muted);
@@ -6456,57 +6461,13 @@ input, textarea, [contenteditable="true"] {
     border-color: var(--primary);
 }
 
-/* Modal Mode Switcher Tabs (Bittalab kiritish vs Ko'plab kiritish) */
-.cw-modal-mode-tabs {
-    display: flex;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 7px;
-    padding: 2px;
-    margin-top: 0;
-    margin-bottom: 10px;
-    gap: 4px;
-}
-
-.cw-mode-tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    height: 26px;
-    padding: 2px 6px;
-    border-radius: 5px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 0.70rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.18s ease;
-    user-select: none;
-}
-
-.cw-mode-tab:hover {
-    color: var(--text-main);
-    background: hsla(var(--h-primary), 84%, 67%, 0.08);
-}
-
-.cw-mode-tab.active {
-    background: var(--primary);
-    color: #ffffff;
-    border-color: var(--primary);
-    box-shadow: 0 1px 4px var(--primary-glow);
-    font-weight: 700;
-}
-
 .cw-row-remove-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
     border: none;
     background: var(--option-bg);
     color: var(--text-muted);
@@ -6524,12 +6485,12 @@ input, textarea, [contenteditable="true"] {
 .cw-word-row-optional {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: 6px;
+    padding: 8px 10px;
     background: hsla(222, 47%, 14%, 0.6);
     border: 1px solid var(--card-border);
-    border-radius: 12px;
-    margin-top: 4px;
+    border-radius: 8px;
+    margin-top: 2px;
     animation: fadeIn 0.2s ease;
 }
 
@@ -6537,18 +6498,24 @@ input, textarea, [contenteditable="true"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     width: 100%;
-    padding: 11px;
-    border-radius: 12px;
+    padding: 6px 10px;
+    height: 32px;
+    border-radius: 8px;
     border: 1.5px dashed var(--primary-glow);
     background: hsla(var(--h-primary), 84%, 67%, 0.08);
     color: var(--primary);
-    font-size: 0.85rem;
+    font-size: 0.76rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     transition: background 0.18s, border-color 0.18s;
+}
+
+.cw-add-row-btn:active {
+    background: hsla(var(--h-primary), 84%, 67%, 0.18);
+    border-color: var(--primary);
 }
 
 .cw-add-row-btn:active {
