@@ -12,8 +12,7 @@ const WELCOME_CAPTION =
   "🔊 <b>Jonli Ovozli Talaffuz</b> — Arab, Ingliz, Rus va barcha tillarda tiniq talaffuz (TTS Engine)\n" +
   "🎮 <b>12 xil Interaktiv Mashqlar</b> — Flashcards, Quiz, Yozish va Eshitish o'yinlari\n" +
   "🔥 <b>Statistika & Seriya</b> — O'rganish ko'rsatkichlaringiz va kunlik faolligingizni kuzatib boring\n" +
-  "🔒 <b>Xavfsiz Xotira</b> — Ma'lumotlaringiz shaxsiy va mutlaqo himoyalangan\n\n" +
-  "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>";
+  "🔒 <b>Xavfsiz Xotira</b> — Ma'lumotlaringiz shaxsiy va mutlaqo himoyalangan\n\n";
 
 function buildMiniAppKeyboard(env) {
   const url = (env && env.miniAppUrl && env.miniAppUrl.startsWith('http')) ? env.miniAppUrl : "https://words.reach.uz/";
@@ -35,30 +34,33 @@ async function sendWelcomeBack(ctx, env) {
   const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
   try {
     await ctx.replyWithPhoto(photoUrl, {
-      caption: `Xush kelibsiz, <b>${ctx.from.first_name || 'Foydalanuvchi'}</b>! 👋\n\n` + WELCOME_CAPTION,
+      caption: `Xush kelibsiz, <b>${ctx.from.first_name || 'Foydalanuvchi'}</b>! 👋\n\n` + WELCOME_CAPTION + "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>",
       parse_mode: 'HTML',
       ...buildMiniAppKeyboard(env)
     });
   } catch (e) {
-    await ctx.reply(WELCOME_CAPTION, {
+    await ctx.reply(WELCOME_CAPTION + "👇 <b>Ilovani ochish uchun pastdagi tugmani bosing:</b>", {
       parse_mode: 'HTML',
       ...buildMiniAppKeyboard(env)
     });
   }
 }
 
-async function sendOnboarding(ctx, env) {
+async function sendPhonePrompt(ctx, env) {
   const photoUrl = env.welcomePhotoUrl || DEFAULT_WELCOME_PHOTO;
+  const promptText = WELCOME_CAPTION +
+    "⚠️ <b>Ilovadan foydalanish uchun telefon raqamingizni tasdiqlashingiz shart!</b>\n\n" +
+    "Iltimos, pastdagi <b>'Telefon raqamini yuborish 📱'</b> tugmasini bosing (o'zingiz qo'lda kiritmang). 👇";
   try {
     await ctx.replyWithPhoto(photoUrl, {
-      caption: WELCOME_CAPTION,
+      caption: promptText,
       parse_mode: 'HTML',
-      ...buildMiniAppKeyboard(env)
+      ...buildContactKeyboard()
     });
   } catch (e) {
-    await ctx.reply(WELCOME_CAPTION, {
+    await ctx.reply(promptText, {
       parse_mode: 'HTML',
-      ...buildMiniAppKeyboard(env)
+      ...buildContactKeyboard()
     });
   }
 }
@@ -69,22 +71,23 @@ function createBot({ env, pool }) {
   bot.start(async (ctx) => {
     const existingUser = await getUserByTelegramId(pool, ctx.from.id);
 
-    if (existingUser) {
+    if (existingUser && existingUser.phone_number) {
       await sendWelcomeBack(ctx, env);
       return;
     }
 
-    await sendOnboarding(ctx, env);
+    await sendPhonePrompt(ctx, env);
   });
 
-  // A shared contact card can name someone other than the sender —
-  // request_contact only ever produces the sender's own card, but we
-  // verify anyway since this must not silently accept the wrong number.
+  // Share Contact handler
   bot.on('contact', async (ctx) => {
     const contact = ctx.message.contact;
 
     if (contact.user_id !== ctx.from.id) {
-      await ctx.reply("Iltimos, faqat o'zingizning raqamingizni yuboring.");
+      await ctx.reply(
+        "⚠️ Iltimos, faqat o'zingizning raqamingizni yuboring. Pastdagi 'Telefon raqamini yuborish 📱' tugmasini bosing.",
+        buildContactKeyboard()
+      );
       return;
     }
 
@@ -92,25 +95,26 @@ function createBot({ env, pool }) {
     await updateUserPhone(pool, user.id, contact.phone_number);
 
     await ctx.reply(
-      'Raqamingiz muvaffaqiyatli tasdiqlandi! Endi ilovadan foydalanishingiz mumkin 🎉',
-      Markup.removeKeyboard()
+      `✅ Raqamingiz (<b>${contact.phone_number}</b>) muvaffaqiyatli tasdiqlandi va bazaga saqlandi! 🎉\n\n` +
+      `Endi ilovadan to'liq foydalanishingiz mumkin 👇`,
+      { parse_mode: 'HTML', ...Markup.removeKeyboard() }
     );
     await ctx.reply('Boshlash uchun quyidagi tugmani bosing:', buildMiniAppKeyboard(env));
   });
 
-  // Any other message: known users get pointed at /start again, unknown
-  // users are re-prompted to share their contact before anything else.
+  // Handle manual text input when phone is not verified
   bot.on('message', async (ctx) => {
     const existingUser = await getUserByTelegramId(pool, ctx.from.id);
 
-    if (existingUser) {
-      await ctx.reply("Ilovani ochish uchun /start buyrug'ini yuboring.", buildMiniAppKeyboard(env));
+    if (existingUser && existingUser.phone_number) {
+      await ctx.reply("Ilovani ochish uchun pastdagi tugmani bosing:", buildMiniAppKeyboard(env));
       return;
     }
 
     await ctx.reply(
-      'Xizmatlardan foydalanish uchun avval telefon raqamingizni tasdiqlang 👇',
-      buildContactKeyboard()
+      "⚠️ <b>Iltimos, raqamni qo'lda kiritmang!</b>\n\n" +
+      "Pastdagi <b>'Telefon raqamini yuborish 📱'</b> tugmasini bosing 👇",
+      { parse_mode: 'HTML', ...buildContactKeyboard() }
     );
   });
 
