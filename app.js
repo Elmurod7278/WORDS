@@ -825,9 +825,16 @@ function renderActiveBookPanel() {
   const gridContainer = document.getElementById("active-units-grid");
   if (!gridContainer) return;
 
+  const isCustomBook = unitNames.some(name => name.startsWith("📁") || isNaN(parseInt(name.replace("Unit ", ""))));
+
   gridContainer.style.display = "grid";
-  gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
-  gridContainer.style.gap = "4px";
+  if (isCustomBook) {
+    gridContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(54px, 1fr))";
+    gridContainer.style.gap = "6px";
+  } else {
+    gridContainer.style.gridTemplateColumns = "repeat(10, 1fr)";
+    gridContainer.style.gap = "4px";
+  }
   gridContainer.style.padding = "2px 0";
 
   unitNames.forEach(unitName => {
@@ -840,13 +847,29 @@ function renderActiveBookPanel() {
     chip.type = "button";
     chip.id = chipId;
     chip.className = `unit-chip ${isSelected ? "selected" : ""}`;
+    if (isCustomBook) {
+      chip.style.height = "32px";
+      chip.style.padding = "2px 4px";
+    }
 
     const cleanTitle = unitName.replace(/^📁\s*/, "");
-    const isLongText = cleanTitle.length > 4;
-    const fontSz = isLongText ? (cleanTitle.length > 7 ? "0.45rem" : "0.52rem") : "0.68rem";
+    let fontSz = "0.68rem";
+    let letterSpacing = "normal";
+
+    if (isNaN(parseInt(cleanTitle))) {
+      if (cleanTitle.length > 8) {
+        fontSz = "0.44rem";
+        letterSpacing = "-0.3px";
+      } else if (cleanTitle.length > 5) {
+        fontSz = "0.50rem";
+        letterSpacing = "-0.2px";
+      } else {
+        fontSz = "0.58rem";
+      }
+    }
 
     chip.innerHTML = `
-      <span style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96%; display: block; line-height: 1.1;">${escapeHTML(cleanTitle)}</span>
+      <span style="font-size: ${fontSz}; letter-spacing: ${letterSpacing}; font-weight: 700; white-space: nowrap; overflow: visible; display: block; line-height: 1.1; text-align: center;">${escapeHTML(cleanTitle)}</span>
       <span class="unit-chip-meta">${unitWords}</span>
     `;
     
@@ -4719,11 +4742,23 @@ function renderLibrarySelectionPhase() {
       displayTitle = `${srcMeta.flag} ${srcMeta.code || srcMeta.name || src} → ${tgtMeta.flag}`;
     }
 
-    const isLong = displayTitle.length > 4;
-    const fontSz = isLong ? (displayTitle.length > 7 ? "0.52rem" : "0.60rem") : "0.85rem";
+    let fontSz = "0.85rem";
+    let letterSpacing = "normal";
+
+    if (isNaN(parseInt(displayTitle))) {
+      if (displayTitle.length > 8) {
+        fontSz = "0.50rem";
+        letterSpacing = "-0.3px";
+      } else if (displayTitle.length > 5) {
+        fontSz = "0.58rem";
+        letterSpacing = "-0.2px";
+      } else {
+        fontSz = "0.72rem";
+      }
+    }
 
     btn.innerHTML = `
-      <span class="library-unit-num" style="font-size: ${fontSz}; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 96%; display: block; line-height: 1.1;">${escapeHTML(displayTitle)}</span>
+      <span class="library-unit-num" style="font-size: ${fontSz}; letter-spacing: ${letterSpacing}; font-weight: 700; white-space: nowrap; overflow: visible; display: block; line-height: 1.1; text-align: center;">${escapeHTML(displayTitle)}</span>
       <span class="library-unit-count">${wordCount} so'z</span>
     `;
     btn.addEventListener("click", () => {
