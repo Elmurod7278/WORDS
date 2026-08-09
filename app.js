@@ -5001,21 +5001,14 @@ function syncCustomWordsToDictionary() {
       _collection: w.collection || "",
     };
 
-    if (w.collection) {
-      // Collection Book (e.g. 📁 A1 Daraja)
-      const collBookName = `📁 ${w.collection}`;
-      if (!dictionaryData[collBookName]) dictionaryData[collBookName] = {};
-      const unitKey = `${srcMeta.flag} ${srcMeta.name} → ${tgtMeta.flag} ${tgtMeta.name}`;
-      if (!dictionaryData[collBookName][unitKey]) dictionaryData[collBookName][unitKey] = [];
-      dictionaryData[collBookName][unitKey].push(item);
-    } else {
-      // Standalone Language Pair Book (e.g. 🇩🇪 Nemis - 🇺🇿 O'zbek)
-      const langBookName = `${srcMeta.flag} ${srcMeta.name} - ${tgtMeta.flag} ${tgtMeta.name}`;
-      if (!dictionaryData[langBookName]) dictionaryData[langBookName] = {};
-      const unitKey = `Lug'atim (${srcMeta.name} → ${tgtMeta.name})`;
-      if (!dictionaryData[langBookName][unitKey]) dictionaryData[langBookName][unitKey] = [];
-      dictionaryData[langBookName][unitKey].push(item);
-    }
+    // Top-level book is ALWAYS Language Pair (e.g. 🇬🇧 Ingliz - 🇺🇿 O'zbek)
+    const langBookName = `${srcMeta.flag} ${srcMeta.name} - ${tgtMeta.flag} ${tgtMeta.name}`;
+    if (!dictionaryData[langBookName]) dictionaryData[langBookName] = {};
+
+    // Unit key inside the language book: Collection name or default "Asosiy lug'at"
+    const unitKey = w.collection ? `📁 ${w.collection}` : `Asosiy lug'at`;
+    if (!dictionaryData[langBookName][unitKey]) dictionaryData[langBookName][unitKey] = [];
+    dictionaryData[langBookName][unitKey].push(item);
   });
 
   if (typeof initSetupScreen === "function") initSetupScreen();
